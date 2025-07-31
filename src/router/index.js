@@ -1,29 +1,45 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import HomeView from '@/views/HomeView.vue'
+import navbar from '@/components/navbar.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      component: navbar,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: '',
+          name: 'home',
+          component: HomeView,
+        },
+        {
+          path: '/new',
+          name: 'newlist',
+          component: () => import('@/views/New/NewListView.vue'),
+        },
+        {
+          path: '/new/add',
+          name: 'newadd',
+          component: () => import('@/views/New/NewFormView.vue'),
+        },
+        {
+          path: '/new/edit/:id',
+          name: 'newedit',
+          component: () => import('@/views/New/NewFormView.vue'),
+        },
+      ],
     },
     {
-      path: '/new',
-      name: 'newlist',
-      component: () => import('@/views/New/NewListView.vue'),
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue'),
+      meta: { guest: true }, // 標記此為訪客頁面
     },
-    {
-      path: '/new/add',
-      name: 'newadd',
-      component: () => import('@/views/New/NewFormView.vue'),
-    },
-    {
-      path: '/new/edit/:id',
-      name: 'newedit',
-      component: () => import('@/views/New/NewFormView.vue'),
-    },
+
     //404保持在最後一個 要加請加在上方↑↑
     {
       path: '/:pathMatch(.*)*',
@@ -38,6 +54,36 @@ const router = createRouter({
       return { top: 0, left: 0 }
     }
   },
+})
+
+/**
+ * 全域導航守衛
+ *
+ * 每次路由切換前都會觸發。
+ * 用於檢查使用者的身份驗證狀態，並控制頁面存取權限。
+ */
+router.beforeEach((to, from, next) => {
+  // 注意：在 Pinia 設置完成前 (app.use(pinia))，不能在模組頂層呼叫 useAuthStore()
+  // 因此我們在守衛內部獲取 auth store
+  const authStore = useAuthStore()
+  const isAuthenticated = authStore.isAuthenticated
+
+  // 情況 1: 路由需要驗證 (requiresAuth: true)，但使用者未登入
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // 將使用者導向到登入頁面
+    next({ name: 'login' })
+  }
+  // 情況 2: 使用者已登入，但試圖訪問僅限訪客的頁面 (guest: true)，例如登入頁
+  else if (to.meta.guest && isAuthenticated) {
+    // 將使用者導向到首頁
+    next({ name: 'home' })
+  }
+  // 情況 3: 其他所有情況都允許訪問
+  // (例如：已登入訪問需驗證頁，或未登入訪問公開頁)
+  else {
+    // 允許訪問
+    next()
+  }
 })
 
 export default router

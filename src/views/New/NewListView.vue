@@ -1,90 +1,92 @@
 <template>
-  <Tablelist
-    title="最新消息管理"
-    :total="filteredData.length"
-    v-model:currentPage="currentPage"
-    :table-data="filteredData"
-    :category-options="categoryOptions"
-    :show-add-button="true"
-    add-button-text="+ 新增消息"
-    @add="handleAddNew"
-    :show-category-filter="true"
-    v-model:category="selectedCategory"
-    :show-search="true"
-    search-placeholder="請輸入標題關鍵字"
-    v-model:searchTerm="searchText"
-    @search="performSearch"
-  >
-    <template #default="scope">
-      <el-table :data="scope.data" stripe>
-        <el-table-column prop="id" label="編號" width="80" />
-        <el-table-column prop="category" label="分類" width="150" />
-        <el-table-column label="封面圖" width="180">
-          <template #default="scope">
-            <div
-              style="
-                width: 120px;
-                height: 80px;
-                border: 1px dashed #ccc;
-                background-color: #f5f5f5;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-              "
-              @click="triggerFileInput(scope.row)"
-            >
-              <template v-if="scope.row.cover">
-                <el-image :src="scope.row.cover" fit="cover" style="width: 100%; height: 100%" />
-              </template>
-              <template v-else>
-                <span style="font-size: 32px; color: #aaa; user-select: none">+</span>
-              </template>
-            </div>
-          </template>
-        </el-table-column>
+  <main>
+    <Tablelist
+      title="最新消息管理"
+      :total="filteredData.length"
+      v-model:currentPage="currentPage"
+      :table-data="filteredData"
+      :category-options="categoryOptions"
+      :show-add-button="true"
+      add-button-text="+ 新增消息"
+      @add="handleAddNew"
+      :show-category-filter="true"
+      v-model:category="selectedCategory"
+      :show-search="true"
+      search-placeholder="請輸入標題關鍵字"
+      v-model:searchTerm="searchText"
+      @search="performSearch"
+    >
+      <template #default="scope">
+        <el-table :data="scope.data" stripe>
+          <el-table-column prop="id" label="編號" width="80" />
+          <el-table-column prop="category" label="分類" width="150" />
+          <el-table-column label="封面圖" width="180">
+            <template #default="scope">
+              <div
+                style="
+                  width: 120px;
+                  height: 80px;
+                  border: 1px dashed #ccc;
+                  background-color: #f5f5f5;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  cursor: pointer;
+                "
+                @click="triggerFileInput(scope.row)"
+              >
+                <template v-if="scope.row.cover">
+                  <el-image :src="scope.row.cover" fit="cover" style="width: 100%; height: 100%" />
+                </template>
+                <template v-else>
+                  <span style="font-size: 32px; color: #aaa; user-select: none">+</span>
+                </template>
+              </div>
+            </template>
+          </el-table-column>
 
-        <el-table-column prop="title" label="標題" />
-        <el-table-column prop="date" label="日期" width="180" />
-        <el-table-column label="狀態" width="140">
-          <template #default="scope">
-            <el-select
-              v-model="scope.row.status"
-              @change="handleStatusChange(scope.row)"
-              size="small"
-              style="width: 100px"
-            >
-              <el-option label="顯示" value="published" />
-              <el-option label="不顯示" value="draft" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="編輯" width="100" align="center">
-          <template #default="scope">
-            <el-button link type="primary">
-              <el-icon><Edit /></el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column label="刪除" width="100" align="center">
-          <template #default="scope">
-            <el-button link type="danger">
-              <el-icon><Delete /></el-icon>
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </template>
-  </Tablelist>
+          <el-table-column prop="title" label="標題" />
+          <el-table-column prop="date" label="日期" width="180" />
+          <el-table-column label="狀態" width="140">
+            <template #default="scope">
+              <el-select
+                v-model="scope.row.status"
+                @change="handleStatusChange(scope.row)"
+                size="small"
+                style="width: 100px"
+              >
+                <el-option label="顯示" value="published" />
+                <el-option label="不顯示" value="draft" />
+              </el-select>
+            </template>
+          </el-table-column>
+          <el-table-column label="編輯" width="100" align="center">
+            <template #default="scope">
+              <el-button link type="primary">
+                <el-icon><Edit /></el-icon>
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="刪除" width="100" align="center">
+            <template #default="scope">
+              <el-button link type="danger">
+                <el-icon><Delete /></el-icon>
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
+    </Tablelist>
 
-  <!-- 上傳圖片用的 input -->
-  <input
-    ref="fileInput"
-    type="file"
-    style="display: none"
-    accept="image/*"
-    @change="handleFileChange"
-  />
+    <!-- 上傳圖片用的 input -->
+    <input
+      ref="fileInput"
+      type="file"
+      style="display: none"
+      accept="image/*"
+      @change="handleFileChange"
+    />
+  </main>
 </template>
 
 <script setup>

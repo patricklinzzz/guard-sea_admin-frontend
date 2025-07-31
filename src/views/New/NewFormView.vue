@@ -1,5 +1,7 @@
 <script setup></script>
 
-<template>NewFormView</template>
+<template>
+  <main>NewFormView</main>
+</template>
 
 <style scoped lang="scss"></style>

@@ -18,6 +18,7 @@
       <div class="second-circles">
         <span></span>
       </div>
+      <router-link to="/"> <el-button type="primary">返回首頁</el-button> </router-link>
     </div>
   </main>
 </template>
@@ -28,6 +29,7 @@
   }
 
   .wrapper {
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;

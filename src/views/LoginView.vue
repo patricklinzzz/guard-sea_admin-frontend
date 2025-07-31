@@ -96,6 +96,7 @@
 
 <style scoped lang="scss">
   .login_container {
+    width: 100vw;
     background-color: v.$color-blue-dark;
     display: flex;
     justify-content: center;

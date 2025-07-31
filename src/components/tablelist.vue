@@ -65,7 +65,6 @@
 
 <script setup>
   import { computed } from 'vue'
-  import { defineProps, defineEmits } from 'vue'
   import { Search } from '@element-plus/icons-vue'
 
   const props = defineProps({

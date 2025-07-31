@@ -9,6 +9,21 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
     },
+    {
+      path: '/new',
+      name: 'newlist',
+      component: () => import('@/views/New/NewListView.vue'),
+    },
+    {
+      path: '/new/add',
+      name: 'newadd',
+      component: () => import('@/views/New/NewFormView.vue'),
+    },
+    {
+      path: '/new/edit/:id',
+      name: 'newedit',
+      component: () => import('@/views/New/NewFormView.vue'),
+    },
     //404保持在最後一個 要加請加在上方↑↑
     {
       path: '/:pathMatch(.*)*',

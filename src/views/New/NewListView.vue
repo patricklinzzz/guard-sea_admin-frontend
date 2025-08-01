@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <div class="page-container">
     <Tablelist
       title="最新消息管理"
       :total="filteredData.length"
@@ -14,60 +14,63 @@
       :show-search="true"
       search-placeholder="請輸入標題關鍵字"
       v-model:searchTerm="searchText"
-      @search="performSearch"
+      :search-key="searchKey"
+      all-label="全部消息"
     >
       <template #default="scope">
-        <el-table :data="scope.data" stripe>
-          <el-table-column prop="id" label="編號" width="80" />
-          <el-table-column prop="category" label="分類" width="150" />
-          <el-table-column label="封面圖" width="180">
+        <!-- 這裡的 min-width 是觸發子元件滾動的條件 -->
+
+        <el-table :data="scope.data" stripe style="width: 100%">
+          <el-table-column prop="id" label="編號" width="80" align="center" />
+          <el-table-column prop="category" label="分類" width="120" align="center" />
+
+          <el-table-column label="封面圖" width="160" align="center">
             <template #default="scope">
               <div
                 style="
                   width: 120px;
-                  height: 80px;
-                  border: 1px dashed #ccc;
+                  aspect-ratio: 4 / 3;
                   background-color: #f5f5f5;
+                  border: 1px solid #ddd;
+                  overflow: hidden;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  cursor: pointer;
+                  margin: auto;
                 "
-                @click="triggerFileInput(scope.row)"
               >
-                <template v-if="scope.row.cover">
-                  <el-image :src="scope.row.cover" fit="cover" style="width: 100%; height: 100%" />
-                </template>
-                <template v-else>
-                  <span style="font-size: 32px; color: #aaa; user-select: none">+</span>
-                </template>
+                <el-image
+                  v-if="scope.row.cover"
+                  :src="scope.row.cover"
+                  fit="cover"
+                  style="width: 100%; height: 100%"
+                />
+                <span v-else style="color: #aaa">暫無圖片</span>
               </div>
             </template>
           </el-table-column>
 
-          <el-table-column prop="title" label="標題" />
-          <el-table-column prop="date" label="日期" width="180" />
-          <el-table-column label="狀態" width="140">
+          <el-table-column prop="title" label="標題" width="700" />
+          <el-table-column prop="date" label="日期" width="150" align="center" />
+
+          <el-table-column label="狀態" width="120" align="center">
             <template #default="scope">
-              <el-select
-                v-model="scope.row.status"
-                @change="handleStatusChange(scope.row)"
-                size="small"
-                style="width: 100px"
-              >
+              <el-select v-model="scope.row.status" size="small" style="width: 100px">
                 <el-option label="顯示" value="published" />
                 <el-option label="不顯示" value="draft" />
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column label="編輯" width="100" align="center">
+
+          <el-table-column label="編輯" width="80" align="center">
             <template #default="scope">
-              <el-button link type="primary">
+              <el-button link type="primary" @click="handleEdit(scope.row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column label="刪除" width="100" align="center">
+
+          <el-table-column label="刪除" width="80" align="center">
             <template #default="scope">
               <el-button link type="danger">
                 <el-icon><Delete /></el-icon>
@@ -77,59 +80,34 @@
         </el-table>
       </template>
     </Tablelist>
-
-    <!-- 上傳圖片用的 input -->
-    <input
-      ref="fileInput"
-      type="file"
-      style="display: none"
-      accept="image/*"
-      @change="handleFileChange"
-    />
-  </main>
+  </div>
 </template>
 
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue'
   import { Edit, Delete } from '@element-plus/icons-vue'
+  import { useRouter } from 'vue-router'
   import Tablelist from '@/components/tablelist.vue'
+
+  const router = useRouter()
 
   const currentPage = ref(1)
   const selectedCategory = ref('all')
   const searchText = ref('')
   const allTableData = ref([])
-  const isLoading = ref(false)
+  const searchKey = ref('title')
   const fetchError = ref(null)
-  const fileInput = ref(null)
-  let currentRowForUpload = null
-
-  const triggerFileInput = (row) => {
-    currentRowForUpload = row
-    fileInput.value?.click()
-  }
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      currentRowForUpload.cover = reader.result
-    }
-    reader.readAsDataURL(file)
-    event.target.value = ''
-  }
 
   const fetchTableData = async () => {
-    isLoading.value = true
     fetchError.value = null
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      allTableData.value = [
+      // 未來這裡直接換成 fetch或axios.get(url) 就行
+      const fakeData = [
         {
           id: 1,
           category: '品牌動態',
           cover: '',
-          title: '徵才公告',
+          title: '徵才公告：我們正在尋找充滿熱情的潛水教練和網站前端工程師，快來加入我們吧！',
           date: '2025-07-09',
           status: 'published',
         },
@@ -137,7 +115,7 @@
           id: 2,
           category: '優惠情報',
           cover: '',
-          title: '潛水優惠',
+          title: '夏季限定！兩人同行，一人免費潛水體驗課程。',
           date: '2025-07-08',
           status: 'draft',
         },
@@ -145,7 +123,7 @@
           id: 3,
           category: '活動花絮',
           cover: '',
-          title: '淨灘圓滿',
+          title: '感謝大家參與上週末的淨灘活動，海洋因你而更美麗。',
           date: '2025-06-02',
           status: 'published',
         },
@@ -153,7 +131,7 @@
           id: 4,
           category: '品牌動態',
           cover: '',
-          title: '新品上架',
+          title: '全新系列蛙鞋與面鏡震撼上市，帶來前所未有的水下視野。',
           date: '2025-07-07',
           status: 'published',
         },
@@ -161,7 +139,7 @@
           id: 5,
           category: '優惠情報',
           cover: '',
-          title: 'VIP 特惠',
+          title: 'VIP 會員專屬，全館裝備享 85 折特惠。',
           date: '2025-07-07',
           status: 'published',
         },
@@ -169,7 +147,7 @@
           id: 6,
           category: '活動花絮',
           cover: '',
-          title: '環保志工',
+          title: '我們的團隊成為了海洋保育署的年度環保志工夥伴。',
           date: '2025-07-07',
           status: 'published',
         },
@@ -177,21 +155,24 @@
           id: 7,
           category: '優惠情報',
           cover: '',
-          title: '折扣碼分享',
+          title: '結帳輸入「DIVE2025」即可獲得 200 元折扣碼。',
           date: '2025-07-07',
           status: 'published',
         },
       ]
+
+      // 模擬成功結果
+      allTableData.value = fakeData
+      return fakeData
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
-    } finally {
-      isLoading.value = false
+      console.error('Fetch 錯誤：', err)
+      return []
     }
   }
 
   onMounted(fetchTableData)
 
-  //  分類選單選項（來自全部資料，不受篩選影響）
   const categoryOptions = computed(() => {
     const counts = {}
     allTableData.value.forEach((item) => {
@@ -205,7 +186,6 @@
     }))
   })
 
-  //  篩選後的資料（根據分類與關鍵字）
   const filteredData = computed(() => {
     let data = [...allTableData.value]
     if (selectedCategory.value !== 'all') {
@@ -213,23 +193,46 @@
     }
     if (searchText.value.trim()) {
       const keyword = searchText.value.trim().toLowerCase()
-      data = data.filter((item) => item.title.toLowerCase().includes(keyword))
+      const key = searchKey.value
+      data = data.filter((item) => {
+        const field = item[key]
+        return field?.toString().toLowerCase().includes(keyword)
+      })
     }
     return data
   })
 
-  //  篩選條件變動 → 回到第一頁
   watch([selectedCategory, searchText], () => {
     currentPage.value = 1
   })
 
   const handleAddNew = () => {
-    console.log('新增消息')
+    router.push({ name: 'newadd' })
   }
-  const performSearch = () => {
-    console.log(`搜尋關鍵字: ${searchText.value}`)
-  }
-  const handleStatusChange = (row) => {
-    console.log(`狀態變更為: ${row.status}`)
+
+  const handleEdit = (row) => {
+    //  router 有定義 path: '/news/edit/:id'，name: 'newsedit'
+    router.push({ name: 'newedit', params: { id: row.id } })
   }
 </script>
+
+<style lang="scss" scoped>
+  /* 為父層容器設定樣式，確保它佔滿寬度 */
+  .page-container {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  :deep(.el-select--small .el-select__wrapper) {
+    font-size: 18px;
+    height: 30px;
+  }
+
+  .el-select-dropdown__item {
+    font-size: 18px;
+  }
+
+  .el-button.is-link {
+    transform: scale(1.7);
+  }
+</style>

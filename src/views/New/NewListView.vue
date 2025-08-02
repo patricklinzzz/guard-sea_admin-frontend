@@ -50,15 +50,19 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="title" label="標題" width="700" />
+          <el-table-column prop="title" label="標題" width="600" />
           <el-table-column prop="date" label="日期" width="150" align="center" />
 
           <el-table-column label="狀態" width="120" align="center">
             <template #default="scope">
-              <el-select v-model="scope.row.status" size="small" style="width: 100px">
-                <el-option label="顯示" value="published" />
-                <el-option label="不顯示" value="draft" />
-              </el-select>
+              <div
+                style="display: flex; justify-content: center; align-items: center; height: 100%"
+              >
+                <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
+                  <el-option label="顯示" value="published" />
+                  <el-option label="不顯示" value="draft" />
+                </el-select>
+              </div>
             </template>
           </el-table-column>
 
@@ -72,7 +76,7 @@
 
           <el-table-column label="刪除" width="80" align="center">
             <template #default="scope">
-              <el-button link type="danger">
+              <el-button link type="danger" @click="handleDelete(scope.row)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </template>
@@ -87,6 +91,7 @@
   import { ref, computed, watch, onMounted } from 'vue'
   import { Edit, Delete } from '@element-plus/icons-vue'
   import { useRouter } from 'vue-router'
+  import { ElMessageBox, ElMessage } from 'element-plus'
   import Tablelist from '@/components/tablelist.vue'
 
   const router = useRouter()
@@ -106,7 +111,7 @@
         {
           id: 1,
           category: '品牌動態',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
           title: '徵才公告：我們正在尋找充滿熱情的潛水教練和網站前端工程師，快來加入我們吧！',
           date: '2025-07-09',
           status: 'published',
@@ -114,7 +119,7 @@
         {
           id: 2,
           category: '優惠情報',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/889929/pexels-photo-889929.jpeg',
           title: '夏季限定！兩人同行，一人免費潛水體驗課程。',
           date: '2025-07-08',
           status: 'draft',
@@ -122,7 +127,7 @@
         {
           id: 3,
           category: '活動花絮',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
           title: '感謝大家參與上週末的淨灘活動，海洋因你而更美麗。',
           date: '2025-06-02',
           status: 'published',
@@ -130,7 +135,7 @@
         {
           id: 4,
           category: '品牌動態',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/3854025/pexels-photo-3854025.jpeg',
           title: '全新系列蛙鞋與面鏡震撼上市，帶來前所未有的水下視野。',
           date: '2025-07-07',
           status: 'published',
@@ -138,7 +143,7 @@
         {
           id: 5,
           category: '優惠情報',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
           title: 'VIP 會員專屬，全館裝備享 85 折特惠。',
           date: '2025-07-07',
           status: 'published',
@@ -146,7 +151,7 @@
         {
           id: 6,
           category: '活動花絮',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/3854025/pexels-photo-3854025.jpeg',
           title: '我們的團隊成為了海洋保育署的年度環保志工夥伴。',
           date: '2025-07-07',
           status: 'published',
@@ -154,7 +159,7 @@
         {
           id: 7,
           category: '優惠情報',
-          cover: '',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
           title: '結帳輸入「DIVE2025」即可獲得 200 元折扣碼。',
           date: '2025-07-07',
           status: 'published',
@@ -213,6 +218,38 @@
   const handleEdit = (row) => {
     //  router 有定義 path: '/news/edit/:id'，name: 'newsedit'
     router.push({ name: 'newedit', params: { id: row.id } })
+  }
+
+  //刪除垃圾桶start
+
+  //刪除垃圾桶end
+
+  const handleDelete = async (row) => {
+    try {
+      await ElMessageBox.confirm('確定要刪除嗎？', {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+
+      // 這是模擬刪除，之後這裡可以改成 await axios.delete(`/api/news/${row.id}`)
+
+      // 模擬延遲
+      setTimeout(() => {
+        fakeDelete(row.id)
+        ElMessage({
+          type: 'success',
+          message: '刪除成功！',
+        })
+      }, 500) // 延遲刪除
+    } catch (err) {
+      // 使用者點了「取消」就什麼都不做
+      console.log('取消刪除', err)
+    }
+  }
+
+  const fakeDelete = (id) => {
+    allTableData.value = allTableData.value.filter((item) => item.id !== id)
   }
 </script>
 

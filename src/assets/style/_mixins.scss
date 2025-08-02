@@ -18,3 +18,11 @@
     z-index: -1;
     pointer-events: none;
 }
+
+//tablelist的共用組件檔改最上方的下拉選單文字大小
+
+@mixin dropdown-item-style($font-size: 18px) {
+    .my-dropdown-style .el-select-dropdown__item {
+        font-size: $font-size !important;
+    }
+}

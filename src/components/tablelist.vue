@@ -17,6 +17,7 @@
           @update:modelValue="emit('update:category', $event)"
           placeholder="請選擇分類"
           style="width: 150px"
+          popper-class="my-dropdown-style"
         >
           <el-option :label="`${props.allLabel}(${totalCount})`" value="all" />
           <el-option
@@ -47,19 +48,18 @@
     <!-- 資料內容 slot -->
     <main class="content-main">
       <slot :data="paginatedData"></slot>
+      <!-- 分頁 -->
+      <footer v-if="total > 0" class="content-footer">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="total"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          @current-change="handlePageChange"
+        />
+      </footer>
     </main>
-
-    <!-- 分頁 -->
-    <footer v-if="total > 0" class="content-footer">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="total"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        @current-change="handlePageChange"
-      />
-    </footer>
   </div>
 </template>
 
@@ -128,7 +128,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 98%;
+    max-width: fit-content;
 
     .content-header {
       display: flex;
@@ -168,6 +168,8 @@
           font-size: 18px;
           height: 36px;
         }
+
+        //  分類item
 
         //  搜尋框
         :deep(.el-input__wrapper) {
@@ -221,7 +223,20 @@
     .content-footer {
       display: flex;
       justify-content: center;
-      padding-top: 16px;
+      padding-top: 18px;
+      max-width: 100%;
+      width: 100%;
+    }
+
+    :deep(.el-table__inner-wrapper:before) {
+      height: 0;
     }
   }
+
+  //以下是引入mixin檔案要改上面下拉類別選項item的文字大小
+
+  @import '../assets/style/mixins'; // 引入 mixin 的檔案，如果有的話
+
+  /* 使用 mixin */
+  @include dropdown-item-style(18px);
 </style>

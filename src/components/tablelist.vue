@@ -235,8 +235,6 @@
 
   //以下是引入mixin檔案要改上面下拉類別選項item的文字大小
 
-  @import '../assets/style/mixins'; // 引入 mixin 的檔案，如果有的話
-
   /* 使用 mixin */
   @include dropdown-item-style(18px);
 </style>

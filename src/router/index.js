@@ -38,6 +38,8 @@ const router = createRouter({
           path: '/quiz/categories',
           name: 'quizCategory',
           component: () => import('@/views/Quiz/QuizTypeView.vue'),
+        },
+        {
           path: 'members',
           name: 'MemberList',
           component: () => import('@/views/member/MemberList.vue'), // 指向您剛剛建立的檔案

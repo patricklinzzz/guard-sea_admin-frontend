@@ -38,6 +38,9 @@ const router = createRouter({
           path: '/quiz/categories',
           name: 'quizCategory',
           component: () => import('@/views/Quiz/QuizTypeView.vue'),
+          path: 'members',
+          name: 'MemberList',
+          component: () => import('@/views/member/MemberList.vue'), // 指向您剛剛建立的檔案
         },
       ],
     },
@@ -45,7 +48,7 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { guest: true }, // 標記此為訪客頁面
+      meta: { guest: true },
     },
 
     //404保持在最後一個 要加請加在上方↑↑

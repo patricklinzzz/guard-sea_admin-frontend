@@ -7,7 +7,7 @@
   const route = useRoute()
 
   const menuItems = [
-    { index: '/連結寫這', title: '會員管理' },
+    { index: '/members', title: '會員管理' },
     { index: '/連結寫這', title: '活動管理' },
     { index: '/new', title: '最新消息管理' },
     {
@@ -16,6 +16,8 @@
       children: [
         { index: '/quiz/questions', title: '測驗題目管理' },
         { index: '/quiz/categories', title: '測驗類別管理' },
+        { index: '/連結寫這', title: '測驗類別管理' },
+        { index: '/連結寫這', title: '測驗題目管理' },
       ],
     },
     {

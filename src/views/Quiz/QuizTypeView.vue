@@ -6,10 +6,10 @@
       v-model:currentPage="currentPage"
       :table-data="filteredData"
       :category-options="categoryOptions"
-      :show-add-button="true"
+      :show-add-button="false"
       add-button-text="+ 新增消息"
       @add="handleAddNew"
-      :show-category-filter="true"
+      :show-category-filter="false"
       v-model:category="selectedCategory"
       :show-search="false"
       search-placeholder="請輸入標題關鍵字"
@@ -22,33 +22,6 @@
         <!-- 這裡的 min-width 是觸發子元件滾動的條件 -->
 
         <el-table :data="scope.data" stripe style="width: 100%">
-          <!-- <el-table-column prop="id" label="編號" width="80" align="center" /> -->
-
-          <!-- <el-table-column label="封面圖" width="160" align="center">
-            <template #default="scope">
-              <div
-                style="
-                  width: 120px;
-                  aspect-ratio: 4 / 3;
-                  background-color: #f5f5f5;
-                  border: 1px solid #ddd;
-                  overflow: hidden;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  margin: auto;
-                "
-              >
-                <el-image
-                  v-if="scope.row.cover"
-                  :src="scope.row.cover"
-                  fit="cover"
-                  style="width: 100%; height: 100%"
-                />
-                <span v-else style="color: #aaa">暫無圖片</span>
-              </div>
-            </template>
-          </el-table-column> -->
           <el-table-column prop="category" label="類別" width="200" align="center">
             <template #default="scope">
               <div
@@ -58,19 +31,25 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="標題" width="600" />
+          <el-table-column prop="question" label="測驗標題" width="600" />
           <!-- <el-table-column prop="date" label="日期" width="150" align="center" /> -->
-
-          <!-- <el-table-column label="狀態" width="120" align="center">
+          <el-table-column prop="passScore" label="及格標準" align="center">
             <template #default="scope">
-              <div
-                style="display: flex; justify-content: center; align-items: center; height: 100%"
-              >
-                <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
-                  <el-option label="顯示" value="published" />
-                  <el-option label="不顯示" value="draft" />
-                </el-select>
-              </div>
+              <span v-if="!scope.row.editable">{{ scope.row.passScore }}</span>
+              <el-input-number
+                v-else
+                v-model="scope.row.passScore"
+                :min="0"
+                :max="100"
+                size="small"
+              />
+            </template>
+          </el-table-column>
+
+          <!-- 🐋 🐢 🌊 題庫數量邏輯還沒寫 🐳 🦞 🐠 -->
+          <!-- <el-table-column label="題庫數量" align="center">
+            <template #default="scope">
+              {{ questionCountMap[scope.row.category] || 0 }}
             </template>
           </el-table-column> -->
 
@@ -78,14 +57,6 @@
             <template #default="scope">
               <el-button link type="primary" @click="handleEdit(scope.row)">
                 <el-icon><Edit /></el-icon>
-              </el-button>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="刪除" width="80" align="center">
-            <template #default="scope">
-              <el-button link type="danger" @click="handleDelete(scope.row)">
-                <el-icon><Delete /></el-icon>
               </el-button>
             </template>
           </el-table-column>
@@ -118,93 +89,68 @@
       const fakeData = [
         {
           id: 1,
-          category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          category: '海洋生物',
+          question: '蘇眉魚族群驟減，除過度捕撈外，主要因何種漁法？',
+          answer: '氰化物或炸魚等破壞性漁法',
+          passScore: '88',
         },
         {
           id: 2,
           category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
+          question:
             '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          answer: '過度捕撈',
+          passScore: '88',
         },
         {
-          id: 1,
-          category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
-          category: '過度捕撈',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
-          category: '過度捕撈',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
+          id: 3,
           category: '生態破壞',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          question: '氣候變遷導致的哪兩種現象對全球珊瑚礁的破壞最大？',
+          answer: '作為幼魚和無脊椎動物的育兒所與重要的碳匯',
+          passScore: '99',
+        },
+
+        {
+          id: 4,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '過度捕撈',
+          passScore: '88',
         },
         {
-          id: 1,
-          category: '生態破壞',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
+          id: 5,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
           answer: '瀕危（Endangered, EN）',
+          passScore: '88',
         },
         {
-          id: 1,
+          id: 6,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '瀕危（Endangered, EN）',
+          passScore: '68',
+        },
+        {
+          id: 7,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '瀕危（Endangered, EN）',
+          passScore: '68',
+        },
+        {
+          id: 8,
           category: '海洋生物',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          question: '蘇眉魚族群驟減，除過度捕撈外，主要因何種漁法？',
+          answer: '氰化物或炸魚等破壞性漁法',
+          passScore: '88',
         },
         {
-          id: 1,
+          id: 9,
           category: '海洋生物',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '氰化物或炸魚等破壞性漁法',
+          passScore: '88',
         },
       ]
 

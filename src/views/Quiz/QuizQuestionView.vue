@@ -11,21 +11,20 @@
       @add="handleAddNew"
       :show-category-filter="true"
       v-model:category="selectedCategory"
-      :show-search="true"
+      :show-search="false"
       search-placeholder="請輸入標題關鍵字"
       v-model:searchTerm="searchText"
       :search-key="searchKey"
-      all-label="全部消息"
-      :page-size="5"
+      all-label="全部題目"
+      :page-size="8"
     >
       <template #default="scope">
         <!-- 這裡的 min-width 是觸發子元件滾動的條件 -->
 
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="id" label="編號" width="80" align="center" />
-          <el-table-column prop="category" label="分類" width="120" align="center" />
+          <!-- <el-table-column prop="id" label="編號" width="80" align="center" /> -->
 
-          <el-table-column label="封面圖" width="160" align="center">
+          <!-- <el-table-column label="封面圖" width="160" align="center">
             <template #default="scope">
               <div
                 style="
@@ -49,12 +48,11 @@
                 <span v-else style="color: #aaa">暫無圖片</span>
               </div>
             </template>
-          </el-table-column>
-
+          </el-table-column> -->
           <el-table-column prop="title" label="標題" width="600" />
-          <el-table-column prop="date" label="日期" width="150" align="center" />
+          <!-- <el-table-column prop="date" label="日期" width="150" align="center" /> -->
 
-          <el-table-column label="狀態" width="120" align="center">
+          <!-- <el-table-column label="狀態" width="120" align="center">
             <template #default="scope">
               <div
                 style="display: flex; justify-content: center; align-items: center; height: 100%"
@@ -63,6 +61,15 @@
                   <el-option label="顯示" value="published" />
                   <el-option label="不顯示" value="draft" />
                 </el-select>
+              </div>
+            </template>
+          </el-table-column> -->
+          <el-table-column prop="answer" label="答案" width="300" align="center">
+            <template #default="scope">
+              <div
+                style="display: flex; justify-content: center; align-items: center; height: 100%"
+              >
+                {{ scope.row.answer }}
               </div>
             </template>
           </el-table-column>
@@ -111,59 +118,93 @@
       const fakeData = [
         {
           id: 1,
-          category: '品牌動態',
+          category: '海洋污染',
           cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title: '徵才公告：我們正在尋找充滿熱情的潛水教練和網站前端工程師，快來加入我們吧！',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
           date: '2025-07-09',
           status: 'published',
+          answer: '瀕危（Endangered, EN）',
         },
         {
           id: 2,
-          category: '優惠情報',
-          cover: 'https://images.pexels.com/photos/889929/pexels-photo-889929.jpeg',
-          title: '夏季限定！兩人同行，一人免費潛水體驗課程。',
-          date: '2025-07-08',
-          status: 'draft',
-        },
-        {
-          id: 3,
-          category: '活動花絮',
+          category: '海洋污染',
           cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title: '感謝大家參與上週末的淨灘活動，海洋因你而更美麗。',
-          date: '2025-06-02',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
           status: 'published',
+          answer: '瀕危（Endangered, EN）',
         },
         {
-          id: 4,
-          category: '品牌動態',
-          cover: 'https://images.pexels.com/photos/3854025/pexels-photo-3854025.jpeg',
-          title: '全新系列蛙鞋與面鏡震撼上市，帶來前所未有的水下視野。',
-          date: '2025-07-07',
-          status: 'published',
-        },
-        {
-          id: 5,
-          category: '優惠情報',
+          id: 1,
+          category: '海洋污染',
           cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title: 'VIP 會員專屬，全館裝備享 85 折特惠。',
-          date: '2025-07-07',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
           status: 'published',
+          answer: '瀕危（Endangered, EN）',
         },
         {
-          id: 6,
-          category: '活動花絮',
-          cover: 'https://images.pexels.com/photos/3854025/pexels-photo-3854025.jpeg',
-          title: '我們的團隊成為了海洋保育署的年度環保志工夥伴。',
-          date: '2025-07-07',
-          status: 'published',
-        },
-        {
-          id: 7,
-          category: '優惠情報',
+          id: 1,
+          category: '過度捕撈',
           cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title: '結帳輸入「DIVE2025」即可獲得 200 元折扣碼。',
-          date: '2025-07-07',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
           status: 'published',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 1,
+          category: '過度捕撈',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
+          status: 'published',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 1,
+          category: '生態破壞',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
+          status: 'published',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 1,
+          category: '生態破壞',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
+          status: 'published',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 1,
+          category: '海洋污染',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
+          status: 'published',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 1,
+          category: '海洋污染',
+          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
+          title:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          date: '2025-07-09',
+          status: 'published',
+          answer: '瀕危（Endangered, EN）',
         },
       ]
 

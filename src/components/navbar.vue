@@ -11,23 +11,23 @@
     { index: '/連結寫這', title: '活動管理' },
     { index: '/new', title: '最新消息管理' },
     {
-      id: 'edu', 
+      id: 'edu',
       title: '教育測驗管理',
       children: [
-        { index: '/連結寫這', title: '測驗類別管理' },
-        { index: '/連結寫這', title: '測驗題目管理' }
-      ]
+        { index: '/quiz/questions', title: '測驗題目管理' },
+        { index: '/quiz/categories', title: '測驗類別管理' },
+      ],
     },
     {
-      id: 'shop', 
+      id: 'shop',
       title: '商店管理',
       children: [
         { index: '/連結寫這', title: '商品管理' },
         { index: '/連結寫這', title: '訂單管理' },
-        { index: '/連結寫這', title: '優惠券管理' }
-      ]
+        { index: '/連結寫這', title: '優惠券管理' },
+      ],
     },
-    { index: '/連結寫這', title: '管理員設定' }
+    { index: '/連結寫這', title: '管理員設定' },
   ]
 
   const handleOpen = (key, keyPath) => {
@@ -47,12 +47,7 @@
           <h2>後台管理</h2>
         </div>
       </router-link>
-      <el-menu
-        :default-active="route.path"
-        router
-        @open="handleOpen"
-        @close="handleClose"
-      >
+      <el-menu :default-active="route.path" router @open="handleOpen" @close="handleClose">
         <template v-for="item in menuItems" :key="item.index || item.id">
           <el-sub-menu v-if="item.children" :index="item.id">
             <template #title>

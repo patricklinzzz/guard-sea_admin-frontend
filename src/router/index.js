@@ -29,6 +29,16 @@ const router = createRouter({
           name: 'newedit',
           component: () => import('@/views/New/NewFormView.vue'),
         },
+        {
+          path: '/quiz/questions',
+          name: 'quizQuestion',
+          component: () => import('@/views/Quiz/QuizQuestionView.vue'),
+        },
+        {
+          path: '/quiz/categories',
+          name: 'quizCategory',
+          component: () => import('@/views/Quiz/QuizTypeView.vue'),
+        },
       ],
     },
     {

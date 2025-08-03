@@ -72,8 +72,9 @@
     total: { type: Number, required: true },
     currentPage: { type: Number, required: true },
     tableData: { type: Array, required: true },
-
+    pageSize: { type: Number, default: 5 },
     showAddButton: { type: Boolean, default: false },
+
     showCategoryFilter: { type: Boolean, default: false },
     showSearch: { type: Boolean, default: false },
 
@@ -82,6 +83,10 @@
 
     category: { type: String, default: 'all' },
     searchTerm: { type: String, default: '' },
+    pageSize: {
+      type: Number,
+      default: 5,
+    },
 
     // 由父層傳入分類選單資料
     categoryOptions: { type: Array, default: () => [] },
@@ -96,13 +101,14 @@
     'update:searchTerm',
     'add',
     'search',
+    'pageSize',
   ])
 
-  const pageSize = 5
+  // const pageSize = 5
 
   const paginatedData = computed(() => {
-    const start = (props.currentPage - 1) * pageSize
-    const end = start + pageSize
+    const start = (props.currentPage - 1) * props.pageSize
+    const end = start + props.pageSize
     return props.tableData.slice(start, end)
   })
 

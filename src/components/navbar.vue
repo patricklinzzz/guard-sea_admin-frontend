@@ -16,8 +16,6 @@
       children: [
         { index: '/quiz/questions', title: '測驗題目管理' },
         { index: '/quiz/categories', title: '測驗類別管理' },
-        { index: '/連結寫這', title: '測驗類別管理' },
-        { index: '/連結寫這', title: '測驗題目管理' },
       ],
     },
     {

@@ -42,7 +42,35 @@ const router = createRouter({
         {
           path: 'members',
           name: 'MemberList',
-          component: () => import('@/views/member/MemberList.vue'), // 指向您剛剛建立的檔案
+          component: () => import('@/views/member/MemberList.vue'),
+          path: '/product',
+          name: 'productlist',
+          component: () => import('@/views/Product/ProductListView.vue'),
+        },
+        {
+          path: '/product/add',
+          name: 'productadd',
+          component: () => import('@/views/Product/ProductFormView.vue'),
+        },
+        {
+          path: '/product/edit/:id',
+          name: 'productedit',
+          component: () => import('@/views/Product/ProductFormView.vue'),
+        },
+        {
+          path: '/order',
+          name: 'order',
+          component: () => import('@/views/Order/OrderListView.vue'),
+        },
+        {
+          path: '/order/:id',
+          name: 'orderdetail',
+          component: () => import('@/views/Order/OrderDetailView.vue'),
+        },
+        {
+          path: '/coupon',
+          name: 'couponlist',
+          component: () => import('@/views/Coupon/CouponListView.vue'),
         },
       ],
     },

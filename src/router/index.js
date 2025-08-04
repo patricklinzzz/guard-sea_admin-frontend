@@ -40,6 +40,17 @@ const router = createRouter({
           component: () => import('@/views/event/AddEvent.vue'),
         },
         {
+          path: '/new/event/:id',
+          name: 'eventEdit',
+          component: () => import('@/views/event/EventEdit.vue'),
+        },
+        {
+          path: '/event/:id/form',
+          name: 'eventForm',
+          component: () => import('@/views/event/EventForm.vue'),
+          props: true,
+        },
+        {
           path: '/quiz/questions',
           name: 'quizQuestion',
           component: () => import('@/views/Quiz/QuizQuestionView.vue'),

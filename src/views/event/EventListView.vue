@@ -217,11 +217,11 @@ onMounted(fetchTableData)
     }
 
     const handleEdit = (row) => {
-    router.push({ name: 'activityEdit', params: { id: row.id } })
+    router.push({ name: 'eventEdit', params: { id: row.id } })
     }
 
     const handleList = (id) => {
-    router.push({ name: 'activityList', params: { id } })
+    router.push({ name: 'eventForm', params: { id } })
     }
 
     const handleStatusChange = (id, newStatus) => {

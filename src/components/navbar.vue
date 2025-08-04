@@ -16,17 +16,15 @@
       children: [
         { index: '/quiz/questions', title: '測驗題目管理' },
         { index: '/quiz/categories', title: '測驗類別管理' },
-        { index: '/連結寫這', title: '測驗類別管理' },
-        { index: '/連結寫這', title: '測驗題目管理' },
       ],
     },
     {
       id: 'shop',
       title: '商店管理',
       children: [
-        { index: '/連結寫這', title: '商品管理' },
-        { index: '/連結寫這', title: '訂單管理' },
-        { index: '/連結寫這', title: '優惠券管理' },
+        { index: '/product', title: '商品管理' },
+        { index: '/order', title: '訂單管理' },
+        { index: '/coupon', title: '優惠券管理' },
       ],
     },
     { index: '/連結寫這', title: '管理員設定' },

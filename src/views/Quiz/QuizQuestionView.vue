@@ -1,13 +1,13 @@
 <template>
   <div class="page-container">
     <Tablelist
-      title="最新消息管理"
+      title="測驗題目管理"
       :total="filteredData.length"
       v-model:currentPage="currentPage"
       :table-data="filteredData"
       :category-options="categoryOptions"
       :show-add-button="true"
-      add-button-text="+ 新增消息"
+      add-button-text="+ 新增題目"
       @add="handleAddNew"
       :show-category-filter="true"
       v-model:category="selectedCategory"
@@ -49,7 +49,7 @@
               </div>
             </template>
           </el-table-column> -->
-          <el-table-column prop="title" label="標題" width="600" />
+          <el-table-column prop="question" label="題目" width="600" />
           <!-- <el-table-column prop="date" label="日期" width="150" align="center" /> -->
 
           <!-- <el-table-column label="狀態" width="120" align="center">
@@ -119,92 +119,60 @@
         {
           id: 1,
           category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
+          question:
             '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
           answer: '瀕危（Endangered, EN）',
         },
         {
           id: 2,
-          category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          category: '海洋生物',
+          question: '蘇眉魚族群驟減，除過度捕撈外，主要因何種漁法？',
+          answer: '氰化物或炸魚等破壞性漁法',
         },
         {
-          id: 1,
-          category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
-          category: '過度捕撈',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
-          category: '過度捕撈',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
-        },
-        {
-          id: 1,
+          id: 3,
           category: '生態破壞',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          question: '氣候變遷導致的哪兩種現象對全球珊瑚礁的破壞最大？',
+          answer: '作為幼魚和無脊椎動物的育兒所與重要的碳匯',
         },
         {
-          id: 1,
-          category: '生態破壞',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
-            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
-          answer: '瀕危（Endangered, EN）',
+          id: 4,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '過度捕撈',
         },
         {
-          id: 1,
+          id: 5,
           category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
+          question:
             '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
           answer: '瀕危（Endangered, EN）',
         },
         {
-          id: 1,
+          id: 6,
           category: '海洋污染',
-          cover: 'https://images.pexels.com/photos/1112007/pexels-photo-1112007.jpeg',
-          title:
+          question:
             '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
-          date: '2025-07-09',
-          status: 'published',
           answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 7,
+          category: '過度捕撈',
+          question: '什麼是造成全球漁業資源枯竭的首要原因？',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 8,
+          category: '海洋污染',
+          question:
+            '藍鯨是地球上體型最大的動物，過去曾因大規模商業捕鯨活動導致數量銳減。目前，IUCN紅色名錄將藍鯨列為哪個瀕危等級？',
+          answer: '瀕危（Endangered, EN）',
+        },
+        {
+          id: 9,
+          category: '海洋生物',
+          question: '蘇眉魚族群驟減，除過度捕撈外，主要因何種漁法？',
+          answer: '氰化物或炸魚等破壞性漁法',
         },
       ]
 

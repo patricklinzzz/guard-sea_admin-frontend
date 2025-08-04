@@ -30,6 +30,16 @@ const router = createRouter({
           component: () => import('@/views/New/NewFormView.vue'),
         },
         {
+          path: '/event/',
+          name: 'eventlist',
+          component: () => import('@/views/event/EventListView.vue'),
+        },
+        {
+          path: '/event/add',
+          name: 'eventAdd',
+          component: () => import('@/views/event/AddEvent.vue'),
+        },
+        {
           path: '/quiz/questions',
           name: 'quizQuestion',
           component: () => import('@/views/Quiz/QuizQuestionView.vue'),

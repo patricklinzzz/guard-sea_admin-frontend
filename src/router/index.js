@@ -37,17 +37,17 @@ const router = createRouter({
         {
           path: '/event/add',
           name: 'eventAdd',
-          component: () => import('@/views/event/AddEvent.vue'),
+          component: () => import('@/views/event/EventFormView.vue'),
         },
         {
           path: '/new/event/:id',
           name: 'eventEdit',
-          component: () => import('@/views/event/EventEdit.vue'),
+          component: () => import('@/views/event/EventFormView.vue'),
         },
         {
           path: '/event/:id/form',
-          name: 'eventForm',
-          component: () => import('@/views/event/EventForm.vue'),
+          name: 'eventMember',
+          component: () => import('@/views/event/EventMember.vue'),
           props: true,
         },
         {

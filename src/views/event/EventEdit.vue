@@ -98,7 +98,7 @@ const handleCancel = () => {
 <template>
   <div class="content-block-wrapper">
     <header class="content-header">
-      <h2 class="content-title">{{ pageTitle }}</h2>
+      <h1 class="content-title">{{ pageTitle }}</h1>
     </header>
 
     <div v-if="!isReady">載入中...</div>
@@ -127,8 +127,10 @@ const handleCancel = () => {
       <el-form-item label="活動地點">
         <div style="display: flex; gap: 10px; width: 100%;">
           <el-select v-model="form.location.area" placeholder="-選擇地區-" style="width: 150px;">
-            <el-option label="桃園市" value="桃園市" />
+            <el-option label="台北市" value="台北市" />
             <el-option label="新北市" value="新北市" />
+            <el-option label="桃園市" value="桃園市" />
+            <el-option label="基隆市" value="基隆市" />
             </el-select>
           <el-input v-model="form.location.address" placeholder="地址" style="flex-grow: 1;" />
         </div>

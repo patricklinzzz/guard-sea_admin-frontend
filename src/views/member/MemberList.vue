@@ -154,7 +154,7 @@
 <style lang="scss" scoped>
   .member_management_container {
     width: 100%;
-    padding: 2rem;
+    // padding: 2rem
     box-sizing: border-box;
   }
 

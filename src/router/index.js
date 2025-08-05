@@ -35,6 +35,16 @@ const router = createRouter({
           component: () => import('@/views/Quiz/QuizQuestionView.vue'),
         },
         {
+          path: '/quiz/questions/add',
+          name: 'q_add',
+          component: () => import('@/views/Quiz/NewQuestionView.vue'),
+        },
+        {
+          path: '/quiz/questions/edit/:id',
+          name: 'q_edit',
+          component: () => import('@/views/Quiz/NewQuestionView.vue'),
+        },
+        {
           path: '/quiz/categories',
           name: 'quizCategory',
           component: () => import('@/views/Quiz/QuizTypeView.vue'),

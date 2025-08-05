@@ -93,9 +93,9 @@
 </script>
 
 <template>
-  <h1>訂單管理</h1>
   <div class="page-container">
     <Tablelist
+      title="訂單管理"
       :total="filteredData.length"
       v-model:currentPage="currentPage"
       :table-data="filteredData"
@@ -176,10 +176,10 @@
 <style lang="scss" scoped>
   .page-container {
     width: 100%;
-    padding: 2rem;
+
     box-sizing: border-box;
   }
-  .el-button.is-link .el-icon {
+  .el-button.is-link  {
     font-size: 18px;
   }
 

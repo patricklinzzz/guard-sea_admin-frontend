@@ -76,7 +76,7 @@
         <el-table :data="scope.data" stripe style="width: 100%">
           <el-table-column prop="sku" label="商品編號" width="180" />
 
-          <el-table-column label="商品圖片" width="120" align="center">
+          <el-table-column label="商品圖片" width="150" align="center">
             <template #default="scope">
               <div class="image-container">
                 <el-image
@@ -92,9 +92,9 @@
 
           <el-table-column prop="name" label="商品名稱" min-width="250" />
 
-          <el-table-column prop="category" label="商品分類" width="120" align="center" />
+          <el-table-column prop="category" label="商品分類" width="150" align="center" />
 
-          <el-table-column prop="status" label="商品狀態" width="120" align="center">
+          <el-table-column prop="status" label="商品狀態" width="150" align="center">
             <template #default="scope">
               <el-tag :type="scope.row.status === '上架' ? 'success' : 'info'">
                 {{ scope.row.status }}
@@ -102,11 +102,11 @@
             </template>
           </el-table-column>
 
-          <el-table-column prop="price" label="商品價格" width="120" align="center">
+          <el-table-column prop="price" label="商品價格" width="150" align="center">
             <template #default="scope">${{ scope.row.price.toLocaleString() }}</template>
           </el-table-column>
 
-          <el-table-column label="編輯" width="80" align="center">
+          <el-table-column label="編輯" width="100" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="handleEdit(scope.row)">
                 <el-icon><Edit /></el-icon>
@@ -123,12 +123,10 @@
   .page-container {
     width: 100%;
     box-sizing: border-box;
-    padding: 2rem;
   }
   .loading-state,
   .error-state {
     text-align: center;
-    padding: 4rem;
     color: #909399;
   }
   .image-container {

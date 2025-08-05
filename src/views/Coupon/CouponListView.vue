@@ -95,18 +95,15 @@
 
 <template>
   <div class="page-container">
-    <h1>優惠券管理</h1>
     <Tablelist
-      title="優惠券類型:"
-      :total="filteredData.length"
-      v-model:currentPage="currentPage"
+      title="優惠券管理"
       :table-data="filteredData"
       :show-add-button="false"
       :show-category-filter="false"
       :show-search="false"
     >
       <template #default="scope">
-        <el-table :data="scope.data" stripe style="width: 100%" v-loading="couponStore.isLoading">
+        <el-table :data="filteredData" stripe style="width: 100%" v-loading="couponStore.isLoading">
           <el-table-column label="名稱" min-width="200">
             <template #default="{ row }">
               <el-input v-if="editingCouponId === row.id" v-model="tempCoupon.title" size="small" />
@@ -114,7 +111,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="使用期限" width="120" align="center">
+          <el-table-column label="使用期限" width="200" align="center">
             <template #default="{ row }">
               <el-input
                 v-if="editingCouponId === row.id"
@@ -126,7 +123,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="面額" width="120" align="center">
+          <el-table-column label="面額" width="200" align="center">
             <template #default="{ row }">
               <el-input
                 v-if="editingCouponId === row.id"
@@ -138,13 +135,13 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="優惠代碼前綴" width="150" align="center">
+          <el-table-column label="優惠代碼前綴" width="200" align="center">
             <template #default="{ row }">
               <span>{{ row.code }}</span>
             </template>
           </el-table-column>
 
-          <el-table-column label="狀態" width="120" align="center">
+          <el-table-column label="狀態" width="180" align="center">
             <template #default="{ row }">
               <el-select
                 :model-value="couponStatuses[row.id]"
@@ -153,7 +150,7 @@
                 :disabled="!!editingCouponId"
               >
                 <el-option label="啟用" value="enabled" />
-                <el-option label="禁用" value="disabled" />
+                <el-option label="停用" value="disabled" />
               </el-select>
             </template>
           </el-table-column>
@@ -179,12 +176,6 @@
   .page-container {
     width: 100%;
     box-sizing: border-box;
-    padding: 2rem;
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
 
     .coupon-type-hint {
       display: inline-block;
@@ -208,7 +199,7 @@
         }
       }
 
-      .el-button.is-link .el-icon {
+      .el-button.is-link {
         transform: scale(1.5);
       }
     }

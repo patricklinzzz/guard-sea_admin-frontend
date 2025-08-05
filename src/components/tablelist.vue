@@ -214,7 +214,7 @@
         background-color: #d2d7dc !important;
         color: #012038;
         font-size: 20px;
-        height: 70px;
+        height: 52px;
       }
 
       :deep(.el-table .cell) {

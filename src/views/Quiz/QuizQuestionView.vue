@@ -4,7 +4,7 @@
   import { useRouter } from 'vue-router'
   import { ElMessageBox, ElMessage } from 'element-plus'
   import Tablelist from '@/components/tablelist.vue'
-  import { useQuizStore } from '@/stores/quizStore'
+  import { useQuizStore } from '@/stores/quiz_store'
 
   const router = useRouter()
   const quizStore = useQuizStore()

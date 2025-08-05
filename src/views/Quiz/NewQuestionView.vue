@@ -1,7 +1,7 @@
 <script setup>
   import { ref, reactive, computed, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { useQuizStore } from '@/stores/quizStore'
+  import { useQuizStore } from '@/stores/quiz_store'
 
   const route = useRoute()
   const router = useRouter()

@@ -194,7 +194,7 @@
             <template #default="{ row }">
               <div v-if="editingState.has(row.id)" width="200">
                 <el-button type="default" @click="handleCancel(row)">取消</el-button>
-                <el-button type="primary" @click="handleSubmit(row)">新增</el-button>
+                <el-button type="primary" @click="handleSubmit(row)">儲存</el-button>
               </div>
               <div v-else>
                 <el-button link type="primary" @click="handleEdit(row)">

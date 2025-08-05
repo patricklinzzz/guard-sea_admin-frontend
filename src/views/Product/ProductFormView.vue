@@ -168,7 +168,12 @@
           >
             <el-image :src="style.imageUrl" fit="cover" class="detail-thumbnail" />
             <div class="color-inputs">
-              <el-input v-model="style.colorName" placeholder="顏色名稱" size="small" />
+              <el-input
+                v-model="style.colorCode"
+                placeholder="顏色代碼"
+                size="small"
+                :disabled="true"
+              />
               <el-color-picker v-model="style.colorCode" size="small" />
             </div>
             <el-button

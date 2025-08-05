@@ -8,7 +8,7 @@
 
   const menuItems = [
     { index: '/members', title: '會員管理' },
-    { index: '/連結寫這', title: '活動管理' },
+    { index: '/event', title: '活動管理' },
     { index: '/new', title: '最新消息管理' },
     {
       id: 'edu',

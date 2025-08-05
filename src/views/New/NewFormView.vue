@@ -12,7 +12,7 @@
   const isReady = ref(false)
   const isSubmitting = ref(false)
   const loadError = ref(false)
-  const allTableData = ref([])
+  const allnew = ref([])
 
   const form = reactive({
     title: '',
@@ -20,15 +20,15 @@
     date: '',
     display: true,
     content: '',
-    cover: '', // 新增封面圖片欄位
+    coverimage: '', // 新增封面圖片欄位
   })
 
-  const fetchTableData = async () => {
+  const newdata = async () => {
     return [
       {
         id: 1,
         category: '品牌動態',
-        cover: '',
+        coverimage: '',
         title: '徵才公告：我們正在尋找充滿熱情的潛水教練和網站前端工程師，快來加入我們吧！',
         date: '2025-07-09',
         status: 'published',
@@ -36,7 +36,7 @@
       {
         id: 2,
         category: '優惠情報',
-        cover: '',
+        coverimage: '',
         title: '夏季限定！兩人同行，一人免費潛水體驗課程。',
         date: '2025-07-08',
         status: 'draft',
@@ -44,7 +44,7 @@
       {
         id: 3,
         category: '活動花絮',
-        cover: '',
+        coverimage: '',
         title: '感謝大家參與上週末的淨灘活動，海洋因你而更美麗。',
         date: '2025-06-02',
         status: 'published',
@@ -52,7 +52,7 @@
       {
         id: 4,
         category: '品牌動態',
-        cover: '',
+        coverimage: '',
         title: '全新系列蛙鞋與面鏡震撼上市，帶來前所未有的水下視野。',
         date: '2025-07-07',
         status: 'published',
@@ -60,7 +60,7 @@
       {
         id: 5,
         category: '優惠情報',
-        cover: '',
+        coverimage: '',
         title: 'VIP 會員專屬，全館裝備享 85 折特惠。',
         date: '2025-07-07',
         status: 'published',
@@ -68,7 +68,7 @@
       {
         id: 6,
         category: '活動花絮',
-        cover: '',
+        coverimage: '',
         title: '我們的團隊成為了海洋保育署的年度環保志工夥伴。',
         date: '2025-07-07',
         status: 'published',
@@ -76,7 +76,7 @@
       {
         id: 7,
         category: '優惠情報',
-        cover: '',
+        coverimage: '',
         title: '結帳輸入「DIVE2025」即可獲得 200 元折扣碼。',
         date: '2025-07-07',
         status: 'published',
@@ -86,11 +86,11 @@
 
   onMounted(async () => {
     try {
-      allTableData.value = await fetchTableData()
+      allnew.value = await newdata()
 
       if (isEditMode.value) {
         const id = Number(route.params.id)
-        const item = allTableData.value.find((i) => i.id === id)
+        const item = allnew.value.find((i) => i.id === id)
         if (item) {
           Object.assign(form, item)
         } else {
@@ -98,17 +98,17 @@
         }
       }
     } catch (err) {
-      console.error('❌ 資料載入錯誤:', err)
+      console.error(' 資料載入錯誤:', err)
       loadError.value = true
     } finally {
       isReady.value = true
     }
   })
 
-  const handleCoverChange = (file) => {
+  const handlecoverimageChange = (file) => {
     const reader = new FileReader()
     reader.onload = () => {
-      form.cover = reader.result
+      form.coverimage = reader.result
     }
     reader.readAsDataURL(file.raw)
   }
@@ -116,7 +116,7 @@
   const handleSubmit = () => {
     if (isSubmitting.value) return
     isSubmitting.value = true
-    console.log(isEditMode.value ? '✔️ 編輯送出：' : '🆕 新增送出：', form)
+    // console.log(isEditMode.value ? ' 編輯送出：' : ' 新增送出：', form)
     setTimeout(() => {
       router.push({ name: 'newlist' })
     }, 300)
@@ -130,11 +130,11 @@
 <template>
   <div class="content-block-wrapper">
     <header class="content-header">
-      <h2 class="content-title">{{ pageTitle }}</h2>
+      <h2 class="content_title">{{ pageTitle }}</h2>
     </header>
 
-    <div v-if="!isReady">⏳ 載入中...</div>
-    <div v-else-if="loadError">❌ 找不到該筆資料，請返回列表頁。</div>
+    <div v-if="!isReady">載入中...</div>
+    <div v-else-if="loadError">找不到該筆資料，請返回列表頁。</div>
 
     <el-form v-else :model="form" label-width="100px" style="max-width: 800px">
       <el-form-item label="標題">
@@ -166,18 +166,18 @@
         <el-upload
           class="upload-demo"
           :show-file-list="false"
-          :on-change="handleCoverChange"
+          :on-change="handlecoverimageChange"
           accept="image/*"
         >
           <el-button type="primary">選擇圖片</el-button>
         </el-upload>
 
-        <div v-if="form.cover" class="cover-preview">
-          <img :src="form.cover" alt="封面預覽" class="cover-img" />
+        <div v-if="form.coverimage" class="coverimage-preview">
+          <img :src="form.coverimage" alt="封面預覽" class="coverimage-img" />
         </div>
       </el-form-item>
 
-      <el-form-item label="消息內容">
+      <el-form-item label="消息內容" class="editor-wrap">
         <CKEditorComponent v-model="form.content" />
       </el-form-item>
 
@@ -195,12 +195,28 @@
   .content-block-wrapper {
     padding: 2rem;
   }
-  .cover-preview {
+
+  .content_title {
+    margin-bottom: 20px;
+  }
+  .coverimage-preview {
     margin-top: 1rem;
   }
-  .cover-img {
+  .coverimage-img {
     max-width: 200px;
     border-radius: 8px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .editor-wrap {
+    min-height: 400px;
+
+    :deep(.ck-editor__editable_inline) {
+      min-height: 350px;
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
   }
 </style>

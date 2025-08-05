@@ -127,8 +127,7 @@
     margin-bottom: 10px;
   }
   .content-block-wrapper {
-    padding: 58px 40px 40px 35px;
-    // padding: 3.8% 0px 0px 40px;
+    // padding: 58px 40px 40px 35px;
 
     background-color: #ffffff;
     display: flex;

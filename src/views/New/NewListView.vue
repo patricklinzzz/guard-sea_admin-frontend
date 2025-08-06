@@ -39,7 +39,7 @@
                 <el-image
                   v-if="scope.row.coverimage"
                   :src="scope.row.coverimage"
-                  fit="coverimage"
+                  fit="cover"
                   style="width: 100%; height: 100%"
                 />
                 <span v-else style="color: #aaa">暫無圖片</span>

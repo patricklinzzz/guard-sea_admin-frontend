@@ -27,7 +27,7 @@
         { index: '/coupon', title: '優惠券管理' },
       ],
     },
-    { index: '/連結寫這', title: '管理員設定' },
+    { index: '/admin', title: '管理員設定' },
   ]
 
   const handleOpen = (key, keyPath) => {
@@ -62,7 +62,7 @@
           </el-menu-item>
         </template>
 
-        <el-menu-item @click="authStore.logout()">
+        <el-menu-item @click="authStore.logout()" index="logout">
           <span>登出</span>
         </el-menu-item>
       </el-menu>

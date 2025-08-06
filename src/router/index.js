@@ -105,6 +105,21 @@ const router = createRouter({
           name: 'couponlist',
           component: () => import('@/views/Coupon/CouponListView.vue'),
         },
+        {
+          path: '/admin',
+          name: 'adminlist',
+          component: () => import('@/views/AdminPage/AdminListView.vue'),
+        },
+        {
+          path: '/admin/add',
+          name: 'adminadd',
+          component: () => import('@/views/AdminPage/AddAdmin.vue'),
+        },
+        {
+          path: '/admin/edit/:id',
+          name: 'adminedit',
+          component: () => import('@/views/AdminPage/EditAdmin.vue'),
+        },
       ],
     },
     {

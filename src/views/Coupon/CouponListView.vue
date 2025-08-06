@@ -92,7 +92,6 @@
     handleCancelEdit()
   }
 </script>
-
 <template>
   <div class="page-container">
     <Tablelist
@@ -102,74 +101,73 @@
       :show-category-filter="false"
       :show-search="false"
       :total="filteredData.length"
-      v-model:currentPage="currentPage"
+      :currentPage="1"
+      :pageSize="10"
     >
-      <template #default="scope">
-        <el-table :data="scope.data" stripe style="width: 100%" v-loading="couponStore.isLoading">
-          <el-table-column label="名稱" min-width="200">
-            <template #default="{ row }">
-              <el-input v-if="editingCouponId === row.id" v-model="tempCoupon.title" size="small" />
-              <span v-else>{{ row.title }}</span>
-            </template>
-          </el-table-column>
+      <el-table :data="filteredData" stripe style="width: 100%" v-loading="couponStore.isLoading">
+        <el-table-column label="名稱" min-width="200">
+          <template #default="{ row }">
+            <el-input v-if="editingCouponId === row.id" v-model="tempCoupon.title" size="small" />
+            <span v-else>{{ row.title }}</span>
+          </template>
+        </el-table-column>
 
-          <el-table-column label="使用期限" width="200" align="center">
-            <template #default="{ row }">
-              <el-input
-                v-if="editingCouponId === row.id"
-                v-model.number="tempCoupon.validDays"
-                size="small"
-                type="number"
-              />
-              <span v-else>{{ row.validDays ? `${row.validDays}天` : '沒有期限限制' }}</span>
-            </template>
-          </el-table-column>
+        <el-table-column label="使用期限" width="200" align="center">
+          <template #default="{ row }">
+            <el-input
+              v-if="editingCouponId === row.id"
+              v-model.number="tempCoupon.validDays"
+              size="small"
+              type="number"
+            />
+            <span v-else>{{ row.validDays ? `${row.validDays}天` : '沒有期限限制' }}</span>
+          </template>
+        </el-table-column>
 
-          <el-table-column label="面額" width="200" align="center">
-            <template #default="{ row }">
-              <el-input
-                v-if="editingCouponId === row.id"
-                v-model.number="tempCoupon.value"
-                size="small"
-                type="number"
-              />
-              <span v-else>${{ row.value }}</span>
-            </template>
-          </el-table-column>
+        <el-table-column label="面額" width="200" align="center">
+          <template #default="{ row }">
+            <el-input
+              v-if="editingCouponId === row.id"
+              v-model.number="tempCoupon.value"
+              size="small"
+              type="number"
+            />
+            <span v-else>${{ row.value }}</span>
+          </template>
+        </el-table-column>
 
-          <el-table-column label="優惠代碼前綴" width="200" align="center">
-            <template #default="{ row }">
-              <span>{{ row.code }}</span>
-            </template>
-          </el-table-column>
+        <el-table-column label="優惠代碼前綴" width="200" align="center">
+          <template #default="{ row }">
+            <span>{{ row.code }}</span>
+          </template>
+        </el-table-column>
 
-          <el-table-column label="狀態" width="180" align="center">
-            <template #default="{ row }">
-              <el-select
-                :model-value="couponStatuses[row.id]"
-                @change="(newStatus) => handleStatusChange(row, newStatus)"
-                size="small"
-                :disabled="!!editingCouponId"
-              >
-                <el-option label="啟用" value="enabled" />
-                <el-option label="停用" value="disabled" />
-              </el-select>
-            </template>
-          </el-table-column>
+        <el-table-column label="狀態" width="180" align="center">
+          <template #default="{ row }">
+            <el-select
+              :model-value="couponStatuses[row.id]"
+              @change="(newStatus) => handleStatusChange(row, newStatus)"
+              size="small"
+              :disabled="!!editingCouponId"
+            >
+              <el-option label="啟用" value="enabled" />
+              <el-option label="停用" value="disabled" />
+            </el-select>
+          </template>
+        </el-table-column>
 
-          <el-table-column label="編輯" width="150" align="center">
-            <template #default="{ row }">
-              <div v-if="editingCouponId === row.id" class="edit-actions">
-                <el-button @click="handleCancelEdit">取消</el-button>
-                <el-button type="warning" @click="handleSaveEdit(row)">儲存</el-button>
-              </div>
-              <el-button v-else link type="primary" @click="handleStartEdit(row)">
-                <el-icon><Edit /></el-icon>
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </template>
+        <el-table-column label="編輯" width="150" align="center">
+          <template #default="{ row }">
+            <div v-if="editingCouponId === row.id" class="edit-actions">
+              <el-button @click="handleCancelEdit">取消</el-button>
+              <el-button type="warning" @click="handleSaveEdit(row)">儲存</el-button>
+            </div>
+            <el-button v-else link type="primary" @click="handleStartEdit(row)">
+              <el-icon><Edit /></el-icon>
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </Tablelist>
   </div>
 </template>

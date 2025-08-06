@@ -52,7 +52,6 @@ export const useAdminStore = defineStore('admin', () => {
   const updateAdmin = (updatedAdminData) => {
     const index = admins.value.findIndex((admin) => admin.id === updatedAdminData.id)
     if (index !== -1) {
-      // 使用新資料替換掉舊資料
       admins.value[index] = updatedAdminData
     }
   }

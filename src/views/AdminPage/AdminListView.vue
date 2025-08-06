@@ -1,22 +1,23 @@
 <template>
   <tablelist
     title="管理員設定"
-    :tableData="adminStore.admins"
+    :tableData="filteredData"
     :showAddButton="true"
     :showSearch="true"
     addButtonText="+ 新增管理員"
     searchPlaceholder="請輸入員工姓名"
-    :total="adminStore.admins.length"
-    :currentPage="currentPage"
-    @update:currentPage="currentPage = $event"
+    :search-key="searchKey"
+    v-model:searchTerm="searchText"
+    :total="filteredData.length"
     @add="handleAddNew"
+    v-model:currentPage="currentPage"
   >
     <template #default="{ data }">
       <el-table :data="data" style="width: 100%">
-        <el-table-column prop="id" label="員工編號" width="180" />
-        <el-table-column prop="name" label="姓名" width="180" />
-        <el-table-column prop="email" label="Email" width="180" />
-        <el-table-column prop="phone" label="電話" width="180" />
+        <el-table-column prop="id" label="員工編號" width="120" />
+        <el-table-column prop="name" label="姓名" width="160" />
+        <el-table-column prop="email" label="Email" width="280" />
+        <el-table-column prop="phone" label="電話" width="160" />
         <el-table-column label="編輯" width="80" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleEdit(row)">
@@ -31,7 +32,7 @@
 
 <script setup>
   import tablelist from '@/components/tablelist.vue'
-  import { ref } from 'vue'
+  import { ref, computed, watch } from 'vue'
   import { Edit } from '@element-plus/icons-vue'
   import { useRouter } from 'vue-router'
   import { useAdminStore } from '@/stores/admin_store'
@@ -40,6 +41,25 @@
   const adminStore = useAdminStore()
 
   const currentPage = ref(1)
+  const searchText = ref('')
+  const searchKey = ref('name')
+
+  const filteredData = computed(() => {
+    let data = [...adminStore.admins]
+    if (searchText.value.trim()) {
+      const keyword = searchText.value.trim().toLowerCase()
+      const key = searchKey.value
+      data = data.filter((item) => {
+        const field = item[key]
+        return field?.toString().toLowerCase().includes(keyword)
+      })
+    }
+    return data
+  })
+
+  watch([searchText], () => {
+    currentPage.value = 1
+  })
 
   const handleAddNew = () => {
     router.push({ name: 'adminadd' })

@@ -101,9 +101,11 @@
       :show-add-button="false"
       :show-category-filter="false"
       :show-search="false"
+      :total="filteredData.length"
+      v-model:currentPage="currentPage"
     >
       <template #default="scope">
-        <el-table :data="filteredData" stripe style="width: 100%" v-loading="couponStore.isLoading">
+        <el-table :data="scope.data" stripe style="width: 100%" v-loading="couponStore.isLoading">
           <el-table-column label="名稱" min-width="200">
             <template #default="{ row }">
               <el-input v-if="editingCouponId === row.id" v-model="tempCoupon.title" size="small" />

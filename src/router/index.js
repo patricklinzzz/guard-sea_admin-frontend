@@ -30,7 +30,7 @@ const router = createRouter({
           component: () => import('@/views/New/NewFormView.vue'),
         },
         {
-          path: '/event/',
+          path: '/event',
           name: 'eventlist',
           component: () => import('@/views/event/EventListView.vue'),
         },
@@ -40,7 +40,7 @@ const router = createRouter({
           component: () => import('@/views/event/EventFormView.vue'),
         },
         {
-          path: '/new/event/:id',
+          path: '/event/:id',
           name: 'eventEdit',
           component: () => import('@/views/event/EventFormView.vue'),
         },

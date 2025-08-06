@@ -1,301 +1,224 @@
 <script setup>
-    import { ref, reactive, computed, onMounted, watch } from 'vue'
-    import { useRoute, useRouter } from 'vue-router'
-    import { Plus, Close } from '@element-plus/icons-vue'
-    import CKEditorComponent from '@/components/ckeditor.vue'
-    import { useProductStore } from '@/stores/product_store.js' 
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { useEventStore } from '@/stores/event_store'
 
-    const route = useRoute()
-    const router = useRouter()
-    const productStore = useProductStore()
+const route = useRoute()
+const router = useRouter()
+const eventStore = useEventStore()
 
-    const isEditMode = computed(() => !!route.params.id)
-    const pageTitle = computed(() => (isEditMode.value ? '編輯活動' : '新增活動'))
+const isEditMode = computed(() => !!route.params.id)
+const pageTitle = computed(() => (isEditMode.value ? '編輯活動' : '新增活動'))
 
-    const isSubmitting = ref(false)
+const isReady = ref(false)
+const isSubmitting = ref(false)
+const loadError = ref(false)
 
-    const isFormLoading = computed(() => productStore.isFormLoading)
-    const formError = computed(() => productStore.formError)
+const form = reactive({
+  title: '',
+  eventDate: [],
+  regDeadline: '',
+  location: '',
+  address: '',
+  coverImage: '',
+  intro: '',
+  content: '',
+  regInfo: '',
+  note: '',
+  category: '',
+  quota: '',
+})
 
-    const getInitialForm = () => ({
-        id: null,
-        eventName: '',
-        eventDate: null,
-        registrationDeadline: null,
-        eventLocation: '',
-        eventAddress: '',
-        mainImageUrl: '',
-        description: '',
-        notes: '',
-        eventCategory: '',
-        quota: 0,
-    })
-    const form = reactive(getInitialForm())
+const dateRange = ref(['2025-08-05 12:00', '2025-08-06 12:00'])
 
-    const uploadRef = ref(null)
+onMounted(async () => {
+  if (eventStore.eventData.length === 0) {
+    await eventStore.fetchEventData()
+  }
 
-    const triggerUpload = () => {
-        uploadRef.value.$el.querySelector('input').click()
+  if (isEditMode.value) {
+    const id = Number(route.params.id)
+    const item = eventStore.eventData.find((i) => i.id === id)
+    if (item) {
+      Object.assign(form, item)
+    } else {
+      loadError.value = true
+    }
+  }
+  isReady.value = true
+})
+
+const handleImageChange = (file) => {
+  const reader = new FileReader()
+  reader.onload = () => {
+    form.coverImage = reader.result
+  }
+  reader.readAsDataURL(file.raw)
+}
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+
+  try {
+    if (isEditMode.value) {
+      const id = Number(route.params.id)
+      const index = eventStore.eventData.findIndex((i) => i.id === id)
+      if (index !== -1) {
+        // 更新原本的活動資料
+        eventStore.eventData[index] = { ...form, id }
+      } else {
+        loadError.value = true
+        return
+      }
+    } else {
+      // 新增活動，假設用時間戳當 ID
+      const newId = Date.now()
+      eventStore.eventData.push({ ...form, id: newId })
     }
 
-    const handleFileChange = (uploadFile) => {
-        form.mainImageUrl = URL.createObjectURL(uploadFile.raw)
-    }
+    router.push({ name: 'eventlist' })
+  } catch (err) {
+    console.error('提交資料錯誤:', err)
+    ElMessage.error('提交失敗，請稍後再試。')
+  } finally {
+    isSubmitting.value = false
+  }
+}
 
-    const removeMainImage = () => {
-        form.mainImageUrl = ''
-        uploadRef.value.clearFiles()
-    }
-
-    const editorConfig = { height: '500px' }
-
-    // 監聽並載入編輯模式下的活動資料
-    watch(
-        () => productStore.currentProduct.data,
-        (newActivityData) => {
-        if (newActivityData) {
-            Object.assign(form, JSON.parse(JSON.stringify(newActivityData)))
-        } else {
-            Object.assign(form, getInitialForm())
-        }
-        },
-        { deep: true }
-    )
-
-    onMounted(() => {
-        if (isEditMode.value) {
-        const activityId = Number(route.params.id)
-        productStore.fetchProductForEdit(activityId) // 這裡邏輯上應為 fetchActivityForEdit
-        } else {
-        productStore.clearCurrentProduct() // 這裡邏輯上應為 clearCurrentActivity
-        }
-    })
-
-    const handleSubmit = async () => {
-        if (isSubmitting.value) return
-        isSubmitting.value = true
-
-        try {
-        if (isEditMode.value) {
-            await productStore.updateProduct(form) // 這裡邏輯上應為 updateActivity
-        } else {
-            await productStore.addProduct(form) // 這裡邏輯上應為 addActivity
-        }
-        alert('儲存成功！')
-        router.push({ name: 'eventlist' })
-        } catch (error) {
-        console.error('儲存失敗:', error)
-        alert('儲存失敗，請查看 Console。')
-        } finally {
-        isSubmitting.value = false
-        }
-    }
-
-    const handleCancel = () => {
-        router.back()
-    }
+const handleCancel = () => {
+  router.back()
+}
 </script>
 
+
 <template>
-    <div class="page-container">
-        <header class="page-header">
-        <h1 class="page-title">{{ pageTitle }}</h1>
-        </header>
+  <div class="content-block-wrapper">
+    <header class="content-header">
+      <h2 class="content_title">{{ pageTitle }}</h2>
+    </header>
+    <div v-if="!isReady">載入中...</div>
+    <div v-else-if="loadError">找不到該筆資料，請返回列表頁。</div>
+    <el-form v-else :model="form" label-width="100px" style="max-width: 800px">
+      <el-form-item label="活動名稱">
+        <el-input v-model="form.title" />
+      </el-form-item>
 
-        <div v-if="isFormLoading" class="loading-text"> 載入中...</div>
-        <div v-else-if="formError" class="error-text"> {{ formError }}</div>
+      <el-form-item label="活動日期">
+        <el-date-picker
+          v-model="form.eventDate"
+          type="datetimerange"
+          start-placeholder="開始日期時間"
+          end-placeholder="結束日期時間"
+          value-format="YYYY-MM-DD HH:mm"
+        />
+      </el-form-item>
 
-        <el-form v-else :model="form" label-position="top">
-        <el-form-item label="活動名稱">
-            <el-input v-model="form.eventName" />
+      <el-form-item label="報名截止">
+        <el-date-picker
+          v-model="form.regDeadline"
+          type="date"
+          placeholder="選擇截止日期"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+
+      <div class="form-row">
+        <el-form-item label="活動地區" class="half">
+          <el-select v-model="form.location" placeholder="選擇地區">
+            <el-option label="台北" value="台北" />
+            <el-option label="新北" value="新北" />
+            <el-option label="高雄" value="高雄" />
+          </el-select>
         </el-form-item>
 
-        <div class="form-row">
-            <el-form-item label="活動日期" class="date-picker-item">
-            <el-date-picker
-                v-model="form.eventDate"
-                type="datetime"
-                placeholder="選擇開始與結束日期時間"
-                range-separator="至"
-                start-placeholder="開始日期"
-                end-placeholder="結束日期"
-                format="YYYY/MM/DD HH:mm"
-                value-format="YYYY-MM-DD HH:mm"
-            />
-            </el-form-item>
-            <el-form-item label="報名截止" class="date-picker-item">
-            <el-date-picker
-                v-model="form.registrationDeadline"
-                type="datetime"
-                placeholder="選擇報名截止日期時間"
-                format="YYYY/MM/DD HH:mm"
-                value-format="YYYY-MM-DD HH:mm"
-            />
-            </el-form-item>
+        <el-form-item label="地址" class="half">
+          <el-input v-model="form.address" />
+        </el-form-item>
+      </div>
+
+      <el-form-item label="活動大圖">
+        <el-upload
+          :show-file-list="false"
+          :on-change="handleImageChange"
+          accept="image/*"
+        >
+          <el-button type="primary">上傳檔案</el-button>
+        </el-upload>
+        <div v-if="form.coverImage" class="coverimage-preview">
+          <img :src="form.coverImage" alt="封面預覽" class="coverimage-img" />
         </div>
+      </el-form-item>
 
-        <div class="form-row">
-            <el-form-item label="活動地點(顯示在列表)">
-            <el-select v-model="form.eventLocation" placeholder="--選擇地區--">
-                <el-option label="台北市" value="台北市" />
-                <el-option label="新北市" value="新北市" />
-                <el-option label="基隆市" value="基隆市" />
-                <el-option label="桃園市" value="桃園市" />
-                <el-option label="宜蘭市" value="宜蘭市" />
-                <el-option label="花蓮市" value="花蓮市" />
-                <el-option label="台東市" value="台東市" />
-            </el-select>
-            </el-form-item>
-            <el-form-item label="地址">
-            <el-input v-model="form.eventAddress" />
-            </el-form-item>
-        </div>
+      <el-form-item label="活動介紹">
+        <el-input type="textarea" v-model="form.intro" :rows="3" />
+      </el-form-item>
 
-        <el-form-item label="活動大圖">
-            <div class="custom-uploader-container">
-            <el-upload
-                ref="uploadRef"
-                action="#"
-                :auto-upload="false"
-                :show-file-list="false"
-                :on-change="handleFileChange"
-                accept="image/*"
-                style="display: none"
-            />
-            <div class="uploader-trigger" @click="triggerUpload">
-                <el-icon><Plus /></el-icon>
-                <span>上傳檔案</span>
-            </div>
+      <el-form-item label="活動內容">
+        <el-input type="textarea" v-model="form.content" :rows="5" />
+      </el-form-item>
 
-            <div v-if="form.mainImageUrl" class="preview-item">
-                <el-image :src="form.mainImageUrl" fit="cover" class="preview-image" />
-                <button class="remove-btn" @click="removeMainImage">
-                <el-icon><Close /></el-icon>
-                </button>
-            </div>
-            </div>
+      <el-form-item label="報名資訊">
+        <el-input type="textarea" v-model="form.regInfo" :rows="3" style="min-height: 100px; resize: none"/>
+      </el-form-item>
+
+      <el-form-item label="備註">
+        <el-input type="textarea" v-model="form.note" :rows="3" style="min-height: 100px; resize: none"/>
+      </el-form-item>
+
+      <div class="form-row">
+        <el-form-item label="活動分類" class="half">
+          <el-select v-model="form.category" placeholder="選擇分類">
+            <el-option label="實體行動" value="實體行動" />
+            <el-option label="教育推廣" value="教育推廣" />
+            <el-option label="線上參與" value="線上參與" />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="活動內容">
-            <CKEditorComponent v-model="form.description" :config="editorConfig" />
+        <el-form-item label="名額" class="half">
+          <el-input v-model="form.quota" />
         </el-form-item>
+      </div>
 
-        <el-form-item label="備註">
-            <el-input v-model="form.notes" />
-        </el-form-item>
-
-        <div class="form-row">
-            <el-form-item label="活動分類">
-            <el-select v-model="form.eventCategory" placeholder="-選擇分類-">
-                <el-option label="戶外活動" value="戶外活動" />
-                <el-option label="室內講座" value="室內講座" />
-                <el-option label="親子體驗" value="親子體驗" />
-            </el-select>
-            </el-form-item>
-            <el-form-item label="名額">
-            <el-input-number v-model="form.quota" :min="0" controls-position="right" />
-            </el-form-item>
-        </div>
-
-        <el-form-item class="form-actions">
-            <el-button @click="handleCancel">取消</el-button>
-            <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
-            {{ isEditMode ? '儲存' : '新增' }}
-            </el-button>
-        </el-form-item>
-        </el-form>
-    </div>
+      <el-form-item>
+        <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
+          {{ isEditMode ? '儲存' : '新增' }}
+        </el-button>
+        <el-button @click="handleCancel">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
+
 <style lang="scss" scoped>
-    .page-container {
-        padding: 2rem;
-        max-width: 800px;
-        margin: auto;
-    }
-    .page-header {
-        margin-bottom: 1.5rem;
-    }
-    .page-title {
-        font-size: 24px;
-        font-weight: bold;
-    }
+.content-block-wrapper {
+  padding: 2rem;
+}
+.content_title {
+  margin-bottom: 20px;
+}
+.coverimage-preview {
+  margin-top: 1rem;
+}
+.coverimage-img {
+  max-width: 200px;
+  margin: 0 1rem;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
 
-    // 新增一個 .form-row 來處理兩欄佈局
-    .form-row {
-        display: flex;
-        gap: 20px;
-        .el-form-item {
-        flex: 1;
-        }
-    }
+.form-row {
+  display: flex;
+  gap: 20px;
 
-    // 圖片上傳區域的樣式
-    .custom-uploader-container {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-    .uploader-trigger {
-        border: 1px solid #dcdfe6;
-        border-radius: 4px;
-        width: 100px;
-        height: 100px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        background-color: #fafafa;
-        transition: border-color 0.2s;
-        &:hover {
-        border-color: #409eff;
-        }
-        .el-icon {
-        font-size: 28px;
-        color: #8c939d;
-        }
-        span {
-        font-size: 12px;
-        color: #606266;
-        }
-    }
+  .half {
+    flex: 1;
+  }
+}
 
-    .preview-item {
-        width: 100px;
-        position: relative;
-        .preview-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 4px;
-        border: 1px solid #dcdfe6;
-        display: block;
-        }
-        .remove-btn {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #f56c6c;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        opacity: 0.8;
-        &:hover {
-            opacity: 1;
-        }
-        }
-    }
-
-    .form-actions {
-        margin-top: 30px;
-        display: flex;
-        justify-content: flex-end;
-    }
+::v-deep(.el-textarea__inner) {
+  resize: none;
+}
 </style>

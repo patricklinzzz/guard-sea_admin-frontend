@@ -46,8 +46,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="title" label="標題" width="350" />
-          <el-table-column prop="date" label="日期" width="150" align="center" />
+          <el-table-column prop="title" label="標題" min-width="350" />
+          <el-table-column prop="date" label="日期" min-width="150" align="center" />
           <el-table-column label="狀態" width="120" align="center">
             <template #default="scope">
               <div
@@ -60,14 +60,14 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="編輯" width="80" align="center">
+          <el-table-column label="編輯" min-width="80" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="handleEdit(scope.row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column label="刪除" width="80" align="center">
+          <el-table-column label="刪除" min-width="80" align="center">
             <template #default="scope">
               <el-button link type="danger" @click="handleDelete(scope.row)">
                 <el-icon><Delete /></el-icon>

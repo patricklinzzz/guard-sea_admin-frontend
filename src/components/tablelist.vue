@@ -133,7 +133,8 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: fit-content;
+    // max-width: fit-content;
+    width: 100%;
 
     .content-header {
       display: flex;

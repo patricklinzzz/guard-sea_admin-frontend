@@ -71,6 +71,33 @@ export const useProductStore = defineStore('productAdmin', () => {
   function clearCurrentProduct() {
     currentProduct.data = null
   }
+  async function generateNextSku(category) {
+    await fetchProducts()
+
+    const categoryPrefixes = {
+      機能服飾: 'FA',
+      各類包款: 'BG',
+      周邊小物: 'AC',
+    }
+    const prefix = categoryPrefixes[category] || 'GEN'
+    const searchPrefix = `${prefix}-`
+
+    const categoryProducts = products.value.filter((p) => p.sku && p.sku.startsWith(searchPrefix))
+
+    let maxSerial = 0
+    categoryProducts.forEach((p) => {
+      const parts = p.sku.split('-')
+      if (parts.length === 2) {
+        const serial = parseInt(parts[1], 10)
+        if (!isNaN(serial) && serial > maxSerial) {
+          maxSerial = serial
+        }
+      }
+    })
+
+    const newSerial = String(maxSerial + 1).padStart(2, '0')
+    return `${searchPrefix}${newSerial}`
+  }
 
   return {
     products,
@@ -86,5 +113,6 @@ export const useProductStore = defineStore('productAdmin', () => {
     formError,
     fetchProductForEdit,
     clearCurrentProduct,
+    generateNextSku,
   }
 })

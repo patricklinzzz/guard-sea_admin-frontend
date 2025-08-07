@@ -66,6 +66,21 @@
   const editorConfig = { height: '500px' }
 
   watch(
+    () => form.category,
+    async (newCategory) => {
+      if (newCategory && !isEditMode.value) {
+        form.sku = '生成中...' 
+        try {
+          const newSku = await productStore.generateNextSku(newCategory)
+          form.sku = newSku
+        } catch (error) {
+          console.error('無法生成商品編號:', error)
+          form.sku = '生成失敗，請稍後重試'
+        }
+      }
+    }
+  )
+  watch(
     () => productStore.currentProduct.data,
     (newProductData) => {
       if (newProductData) {
@@ -125,7 +140,9 @@
     <div v-else-if="formError" class="error-text">❌ {{ formError }}</div>
 
     <el-form v-else :model="form" label-position="top">
-      <el-form-item label="商品編號"><el-input v-model="form.sku" /></el-form-item>
+      <el-form-item label="商品編號">
+        <el-input v-model="form.sku" :disabled="true" placeholder="選擇分類後自動生成" />
+      </el-form-item>
       <el-form-item label="商品分類">
         <el-select v-model="form.category" placeholder="-選擇類型-">
           <el-option label="機能服飾" value="機能服飾" />

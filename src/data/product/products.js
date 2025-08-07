@@ -1,7 +1,7 @@
 export const Products = [
   {
     id: 1,
-    sku: 'SHORTS-1',
+    sku: 'FA-01',
     name: '循環短褲',
     description: '採用回收海洋塑料與環保纖維製成...',
     price: 790,
@@ -34,7 +34,7 @@ export const Products = [
   },
   {
     id: 2,
-    sku: 'SLINGBAG-2',
+    sku: 'BG-01',
     name: '海豚側背包',
     description: '以回收寶特瓶製成的環保布料打造...',
     price: 1200,
@@ -67,7 +67,7 @@ export const Products = [
   },
   {
     id: 3,
-    sku: 'BOTTLE-3',
+    sku: 'AC-01',
     name: '守護水壺',
     description: '以食品級不鏽鋼與回收塑料製成...',
     price: 350,
@@ -100,7 +100,7 @@ export const Products = [
   },
   {
     id: 4,
-    sku: 'TOWEL-4',
+    sku: 'AC-02',
     name: '珊瑚毛巾',
     description: '由回收寶特瓶製成的環保紗線織造...',
     price: 1500,
@@ -133,7 +133,7 @@ export const Products = [
   },
   {
     id: 5,
-    sku: 'PCASE-5',
+    sku: 'BG-02',
     name: '綠蠵龜筆袋',
     description: '守護綠蠵龜，就是守護生態的平衡...',
     price: 650,
@@ -166,7 +166,7 @@ export const Products = [
   },
   {
     id: 6,
-    sku: 'POUCH-6',
+    sku: 'BG-03',
     name: '護鯨零錢包',
     description: '每個細節都來自對鯨魚的愛...',
     price: 900,
@@ -199,7 +199,7 @@ export const Products = [
   },
   {
     id: 7,
-    sku: 'UMBRELLA-7',
+    sku: 'AC-03',
     name: '大白鯊雨傘',
     description: '回收傘布結合強化玻纖骨架...',
     price: 790,
@@ -232,7 +232,7 @@ export const Products = [
   },
   {
     id: 8,
-    sku: 'MUG-8',
+    sku: 'AC-04',
     name: '魟魚馬克杯',
     description: '使用可回收陶土與天然無毒釉料燒製...',
     price: 1200,
@@ -265,7 +265,7 @@ export const Products = [
   },
   {
     id: 9,
-    sku: 'TOTEBAG-9',
+    sku: 'BG-04',
     name: '海馬帆布袋',
     description: '選用再生棉帆布，以減廢低碳方式製造...',
     price: 350,
@@ -285,7 +285,7 @@ export const Products = [
       },
       {
         colorName: '帆布黑',
-        colorCode: '#00000',
+        colorCode: '#000000',
         imageUrl: new URL('@/assets/images/product/bag_black.jpg', import.meta.url).href,
       },
       {

@@ -72,10 +72,10 @@ const activityList = ref([
         >
             <template #default="{ data }">
             <el-table :data="data" style="width: 100%" class="activity_list_table">
-                <el-table-column prop="id" label="編號" width="80" align="center" />
-                <el-table-column prop="name" label="姓名" width="150" align="center" />
+                <el-table-column prop="id" label="編號" min-width="80" align="center" />
+                <el-table-column prop="name" label="姓名" min-width="150" align="center" />
                 <el-table-column prop="email" label="Email" min-width="250" />
-                <el-table-column prop="phone" label="電話" width="180" align="center" />
+                <el-table-column prop="phone" label="電話" min-width="180" align="center" />
                 <el-table-column prop="notes" label="備註" min-width="300" />
             </el-table>
             </template>

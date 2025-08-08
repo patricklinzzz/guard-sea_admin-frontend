@@ -104,28 +104,28 @@ const formatDateRange = (dateRange) => {
     >
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="title" label="活動名稱" width="180" />
-          <el-table-column prop="category" label="活動分類" width="120" align="center" />
-          <el-table-column prop="deadline" label="報名截止" width="140" align="center" />
-          <el-table-column label="活動日期" width="180" align="center">
+          <el-table-column prop="title" label="活動名稱" min-width="180" />
+          <el-table-column prop="category" label="活動分類" min-width="120" align="center" />
+          <el-table-column prop="deadline" label="報名截止" min-width="140" align="center" />
+          <el-table-column label="活動日期" min-width="180" align="center">
             <template #default="scope">
               {{ formatDateRange(scope.row.eventDate) }}
             </template>
           </el-table-column>
-          <el-table-column prop="quota" label="名額" width="80" align="center" />
-          <el-table-column label="名單查詢" width="120" align="center">
+          <el-table-column prop="quota" label="名額" min-width="80" align="center" />
+          <el-table-column label="名單查詢" min-width="120" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="handleeventMember(scope.row)">>></el-button>
             </template>
           </el-table-column>
-          <el-table-column label="編輯" width="80" align="center">
+          <el-table-column label="編輯" min-width="80" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="handleEdit(scope.row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column label="狀態" width="120" align="center">
+          <el-table-column label="狀態" min-width="120" align="center">
             <template #default="scope">
               <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
                 <el-option label="報名中" value="open" />

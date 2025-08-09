@@ -14,11 +14,11 @@
       >
         <template #default="{ data }">
           <el-table :data="data" style="width: 100%" class="member_list_table">
-            <el-table-column prop="id" label="會員編號" width="170" align="center" />
-            <el-table-column prop="name" label="會員姓名" width="170" align="center" />
+            <el-table-column prop="id" label="會員編號" min-width="170" align="center" />
+            <el-table-column prop="name" label="會員姓名" min-width="170" align="center" />
             <el-table-column prop="email" label="Email" min-width="200" />
-            <el-table-column prop="phone" label="電話" width="180" align="center" />
-            <el-table-column label="會員狀態" width="180" align="center">
+            <el-table-column prop="phone" label="電話" min-width="180" align="center" />
+            <el-table-column label="會員狀態" min-width="180" align="center">
               <template #default="scope">
                 <el-select
                   :model-value="scope.row.status"

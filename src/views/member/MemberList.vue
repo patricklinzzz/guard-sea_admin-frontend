@@ -9,6 +9,7 @@
         v-model:search-term="searchTerm"
         :show-search="true"
         search-placeholder="請輸入會員姓名"
+        :page-size="10"
         @search="performSearch"
       >
         <template #default="{ data }">

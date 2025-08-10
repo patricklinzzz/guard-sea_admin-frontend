@@ -11,13 +11,14 @@
     :total="filteredData.length"
     @add="handleAddNew"
     v-model:currentPage="currentPage"
+    :page-size="10"
   >
     <template #default="{ data }">
       <el-table :data="data" style="width: 100%">
-        <el-table-column prop="id" label="員工編號" width="120" />
-        <el-table-column prop="name" label="姓名" width="160" />
-        <el-table-column prop="email" label="Email" width="280" />
-        <el-table-column prop="phone" label="電話" width="160" />
+        <el-table-column prop="id" label="員工編號" min-width="120" />
+        <el-table-column prop="name" label="姓名" min-width="160" />
+        <el-table-column prop="email" label="Email" min-width="280" />
+        <el-table-column prop="phone" label="電話" min-width="160" />
         <el-table-column label="編輯" width="80" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleEdit(row)">

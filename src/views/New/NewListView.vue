@@ -20,7 +20,7 @@
     >
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="category" label="分類" width="120" align="center" />
+          <el-table-column prop="category_id" label="分類" width="120" align="center" />
           <el-table-column label="封面圖" width="160" align="center">
             <template #default="scope">
               <div
@@ -47,15 +47,15 @@
             </template>
           </el-table-column>
           <el-table-column prop="title" label="標題" min-width="350" />
-          <el-table-column prop="date" label="日期" min-width="150" align="center" />
+          <el-table-column prop="publish_date" label="日期" min-width="150" align="center" />
           <el-table-column label="狀態" width="120" align="center">
             <template #default="scope">
               <div
                 style="display: flex; justify-content: center; align-items: center; height: 100%"
               >
                 <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
-                  <el-option label="顯示" value="published" />
-                  <el-option label="不顯示" value="draft" />
+                  <el-option label="顯示" :value="1" />
+                  <el-option label="不顯示" :value="0" />
                 </el-select>
               </div>
             </template>

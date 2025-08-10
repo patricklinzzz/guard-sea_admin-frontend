@@ -20,7 +20,7 @@
     >
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="category_id" label="分類" width="120" align="center" />
+          <el-table-column prop="category_name" label="分類" width="120" align="center" />
           <el-table-column label="封面圖" width="160" align="center">
             <template #default="scope">
               <div
@@ -37,8 +37,8 @@
                 "
               >
                 <el-image
-                  v-if="scope.row.coverimage"
-                  :src="scope.row.coverimage"
+                  v-if="scope.row.image_url"
+                  :src="scope.row.image_url"
                   fit="cover"
                   style="width: 100%; height: 100%"
                 />
@@ -103,12 +103,22 @@
 
   // 用 newStore.newData（不加 .value）
   const categoryOptions = computed(() => {
+    // 步驟一：計算每篇文章分類的數量，這部分保持不變
     const counts = {}
     newStore.newData.forEach((item) => {
-      if (!item.category) return
-      counts[item.category] = (counts[item.category] || 0) + 1
+      if (!item.category_id) return
+      counts[item.category_id] = (counts[item.category_id] || 0) + 1
     })
-    return Object.entries(counts).map(([key, count]) => ({ label: key, value: key, count }))
+
+    // 步驟二：遍歷分類列表，並將計算好的數量附加進去
+    return newStore.categories.map((cat) => ({
+      label: cat.category_name,
+      value: cat.category_id,
+
+      // 從 counts 物件中，根據當前分類的 ID (cat.category_id) 查找數量
+      // 如果找不到 (例如某個分類下還沒有文章)，就給它一個預設值 0
+      count: counts[cat.category_id] || 0,
+    }))
   })
 
   const filteredData = computed(() => {
@@ -117,11 +127,11 @@
 
     // *** 在這裡加上排序邏輯 ***
     // 根據日期進行降冪排序 (新 -> 舊)
-    data.sort((a, b) => new Date(b.date) - new Date(a.date))
+    data.sort((a, b) => new Date(b.publish_date) - new Date(a.publish_date))
 
     // 後續的篩選邏輯保持不變
     if (selectedCategory.value !== 'all') {
-      data = data.filter((item) => item.category === selectedCategory.value)
+      data = data.filter((item) => item.category_id === selectedCategory.value)
     }
     if (searchText.value.trim()) {
       const keyword = searchText.value.trim().toLowerCase()
@@ -142,7 +152,7 @@
   }
 
   const handleEdit = (row) => {
-    router.push({ name: 'newedit', params: { id: row.id } })
+    router.push({ name: 'newedit', params: { id: row.news_id } })
   }
 
   // 刪除資料
@@ -154,7 +164,7 @@
         type: 'warning',
       })
       // 呼叫 Pinia store 的 deleteNews 方法來刪除資料
-      newStore.deleteNews(row.id)
+      newStore.deleteNews(row.news_id)
 
       ElMessage({
         type: 'success',

@@ -3,6 +3,8 @@
   import { useRoute, useRouter } from 'vue-router'
   import CKEditorComponent from '@/components/ckeditor.vue'
   import { useNewStore } from '@/stores/new_store'
+  import { ElMessage } from 'element-plus'
+
   const route = useRoute()
   const router = useRouter()
   const newStore = useNewStore()
@@ -16,26 +18,25 @@
 
   const form = reactive({
     title: '',
-    category: '',
-    date: '',
-    display: true,
+    category_id: '',
+    publish_date: '',
+    display: true, // 預設為顯示
     content: '',
-    coverimage: '',
+    image_url: '',
   })
 
   onMounted(async () => {
-    // 確保 store 中有資料，若無則先載入
     if (newStore.newData.length === 0) {
       await newStore.fetchnewData()
     }
 
     if (isEditMode.value) {
       const id = Number(route.params.id)
-      const item = newStore.newData.find((i) => i.id === id)
+      const item = newStore.newData.find((i) => i.news_id === id)
       if (item) {
+        // 使用 Object.assign 複製大部分欄位
         Object.assign(form, item)
-        // 將 status 轉換為 display 以便 switch 正確顯示
-        form.display = item.status === 'published'
+        form.display = item.status === 1
       } else {
         loadError.value = true
       }
@@ -46,7 +47,7 @@
   const handlecoverimageChange = (file) => {
     const reader = new FileReader()
     reader.onload = () => {
-      form.coverimage = reader.result
+      form.image_url = reader.result
     }
     reader.readAsDataURL(file.raw)
   }
@@ -55,22 +56,22 @@
     if (isSubmitting.value) return
     isSubmitting.value = true
 
-    // 準備要提交的資料，進行轉換
+    // 準備要提交的資料，將布林值 display 轉換回數字 status
     const submissionData = {
       ...form,
-      status: form.display ? 'published' : 'draft', // 將 display 轉換回 status
+      status: form.display ? 1 : 0, // true 轉為 1, false 轉為 0
     }
-    // 刪除不再需要的 display 屬性，保持資料模型乾淨
+    // 刪除表單中暫時使用的 display 屬性，保持資料模型乾淨
     delete submissionData.display
 
     try {
       if (isEditMode.value) {
         const id = Number(route.params.id)
-        // 將轉換後的資料傳給 updateNews
-        await newStore.updateNews(id, submissionData)
+        // 將轉換後的正確資料傳給 updateNews
+        newStore.updateNews(id, submissionData)
       } else {
-        // 將轉換後的資料傳給 addNews
-        await newStore.addNews(submissionData)
+        // 將轉換後的正確資料傳給 addNews
+        newStore.addNews(submissionData) // await 不是必需的
       }
 
       router.push({ name: 'newlist' })
@@ -89,7 +90,6 @@
     router.back()
   }
 </script>
-
 <template>
   <div class="content-block-wrapper">
     <header class="content-header">
@@ -102,15 +102,19 @@
         <el-input v-model="form.title" />
       </el-form-item>
       <el-form-item label="分類">
-        <el-select v-model="form.category" placeholder="請選擇分類">
-          <el-option label="品牌動態" value="品牌動態" />
-          <el-option label="優惠情報" value="優惠情報" />
-          <el-option label="活動花絮" value="活動花絮" />
+        <el-select v-model="form.category_id" placeholder="請選擇分類">
+          <!-- 使用 v-for 遍歷 store 中的分類列表 -->
+          <el-option
+            v-for="category in newStore.categories"
+            :key="category.category_id"
+            :label="category.category_name"
+            :value="category.category_id"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="日期">
         <el-date-picker
-          v-model="form.date"
+          v-model="form.publish_date"
           type="date"
           placeholder="選擇日期"
           value-format="YYYY-MM-DD"
@@ -128,8 +132,8 @@
         >
           <el-button type="primary">選擇圖片</el-button>
         </el-upload>
-        <div v-if="form.coverimage" class="coverimage-preview">
-          <img :src="form.coverimage" alt="封面預覽" class="coverimage-img" />
+        <div v-if="form.image_url" class="coverimage-preview">
+          <img :src="form.image_url" alt="封面預覽" class="coverimage-img" />
         </div>
       </el-form-item>
       <el-form-item label="消息內容" class="editor-wrap">

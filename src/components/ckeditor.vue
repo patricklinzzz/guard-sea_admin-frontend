@@ -64,6 +64,7 @@
     TextTransformation,
     TodoList,
     Underline,
+    CodeBlock,
   } from 'ckeditor5'
 
   import translations from 'ckeditor5/translations/zh.js'
@@ -104,6 +105,7 @@
           'ImageUpload',
           'insertTable',
           'blockQuote',
+          'codeBlock',
           '|',
           'bulletedList',
           'numberedList',
@@ -151,6 +153,7 @@
         TextTransformation,
         TodoList,
         Underline,
+        CodeBlock,
       ],
       heading: {
         options: [

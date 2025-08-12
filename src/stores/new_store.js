@@ -118,7 +118,7 @@ export const useNewStore = defineStore('new', () => {
     fetchError.value = null
     try {
       // 1. 從環境變數讀取 API 的基礎路徑
-      const baseUrl = import.meta.env.VITE_API_BASE_URL
+      const baseUrl = import.meta.env.VITE_API_BASE
 
       // 2. 拼接出完整的 API 端點 URL
       const apiUrl = `${baseUrl}/get_news.php`

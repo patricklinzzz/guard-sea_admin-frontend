@@ -117,7 +117,12 @@ export const useNewStore = defineStore('new', () => {
 
     fetchError.value = null
     try {
-      const apiUrl = 'http://localhost:8888/guardsea-api/get_news.php'
+      // 1. 從環境變數讀取 API 的基礎路徑
+      const baseUrl = import.meta.env.VITE_API_BASE_URL
+
+      // 2. 拼接出完整的 API 端點 URL
+      const apiUrl = `${baseUrl}/get_news.php`
+      // const apiUrl = 'http://localhost:8888/guard-sea-api/get_news.php'
       const response = await axios.get(apiUrl)
 
       // 從返回的物件中，分別取出 news 和 categories

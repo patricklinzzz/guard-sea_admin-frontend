@@ -137,7 +137,7 @@
         </div>
       </el-form-item>
       <el-form-item label="消息內容" class="editor-wrap">
-        <CKEditorComponent v-model="form.content" />
+        <CKEditorComponent v-if="isReady" v-model="form.content" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">

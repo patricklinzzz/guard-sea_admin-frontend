@@ -5,7 +5,7 @@
         <div ref="editorElement">
           <ckeditor
             v-if="editor && editorConfig"
-            :model-value="initialLoadContent"
+            :model-value="props.modelValue"
             :editor="editor"
             :config="editorConfig"
             @ready="onEditorReady"
@@ -65,6 +65,7 @@
     TodoList,
     Underline,
     CodeBlock,
+    SimpleUploadAdapter,
   } from 'ckeditor5'
 
   import translations from 'ckeditor5/translations/zh.js'
@@ -73,10 +74,32 @@
   /**
    * Create a free account with a trial: https://portal.ckeditor.com/checkout?plan=free
    */
-  const initialLoadContent = ref('')
+  // const initialLoadContent = ref('')
+
+  //新增接收內容的屬性定義start
+  const props = defineProps({
+    modelValue: {
+      type: String,
+      default: '',
+    },
+  })
+
+  const emit = defineEmits(['update:modelValue'])
+
+  //新增接收內容的屬性定義end
+
   let ckeditorInstance = null
   const onEditorReady = (currentEditorInstance) => {
     ckeditorInstance = currentEditorInstance
+
+    // 監聽編輯器內容的 'change:data' 事件start
+    ckeditorInstance.model.document.on('change:data', () => {
+      // 獲取編輯器當前的 HTML 內容
+      const data = ckeditorInstance.getData()
+      // 透過 emit 發出 update:modelValue 事件，並將新內容作為參數傳出去
+      emit('update:modelValue', data)
+    })
+    // 監聽編輯器內容的 'change:data' 事件end
   }
 
   const LICENSE_KEY = 'GPL' // or <YOUR_LICENSE_KEY>.
@@ -154,7 +177,17 @@
         TodoList,
         Underline,
         CodeBlock,
+        SimpleUploadAdapter,
       ],
+
+      simpleUpload: {
+        // 這裡填寫您後端用來處理圖片上傳的 PHP 檔案的完整 URL
+        uploadUrl: 'http://localhost:8888/guard-sea-api/upload_image.php',
+        // 您也可以在這裡設定 headers，例如傳遞 token
+        // headers: {
+        //   'Authorization': 'Bearer <YOUR_TOKEN>'
+        // }
+      },
       heading: {
         options: [
           {

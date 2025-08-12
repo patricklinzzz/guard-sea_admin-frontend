@@ -12,44 +12,25 @@
   const currentPage = ref(1)
   const selectedCategory = ref('all')
   const searchText = ref('')
-  const allTableData = quizStore.quizzes
   const fetchError = ref(null)
-
-  // const fetchTableData = async () => {
-  //   fetchError.value = null
-  //   try {
-  //     // 未來這裡直接換成 fetch或axios.get(url) 就行
-  //     const fakeData = useQuizStore().quizzes
-
-  //     // 模擬成功結果
-  //     allTableData.value = fakeData
-  //     return fakeData
-  //   } catch (err) {
-  //     fetchError.value = '資料載入失敗，請稍後再試'
-  //     console.error('Fetch 錯誤：', err)
-  //     return []
-  //   }
-  // }
-
-  // onMounted(fetchTableData)
+  const loading = ref(true)
 
   const categoryOptions = computed(() => {
     const counts = {}
-    const quiz_map = { 1: '海洋生物', 2: '海洋污染', 3: '過度捕撈', 4: '生態破壞' }
-    allTableData.forEach((item) => {
+    quizStore.quizzes.forEach((item) => {
       if (!item.quiz_id) return
       counts[item.quiz_id] = (counts[item.quiz_id] || 0) + 1
     })
     return Object.entries(counts).map(([key, count]) => ({
-      label: quiz_map[key],
+      label: quizStore.quiz_map[key],
       value: key,
       count,
     }))
   })
 
   const filteredData = computed(() => {
-    console.log(allTableData.length)
-    let data = [...allTableData]
+    console.log(quizStore.quizzes.length)
+    let data = [...quizStore.quizzes]
     if (selectedCategory.value !== 'all') {
       data = data.filter((item) => item.quiz_id == selectedCategory.value)
     }
@@ -65,13 +46,8 @@
   }
 
   const handleEdit = (row) => {
-    //  router 有定義 path: '/news/edit/:id'，name: 'newsedit'
     router.push({ name: 'q_edit', params: { id: row.question_id } })
   }
-
-  //刪除垃圾桶start
-
-  //刪除垃圾桶end
 
   const handleDelete = async (row) => {
     try {
@@ -99,12 +75,23 @@
 
   const fakeDelete = (id) => {
     quizStore.deleteQuestionToQuiz(id)
-    // allTableData.filter((item) => item.question_id != id)
+    // quizStore.quizzes.filter((item) => item.question_id != id)
   }
+
+  onMounted(async () => {
+    loading.value = true
+    try {
+      await quizStore.fetchAllQuizzes()
+    } finally {
+      loading.value = false
+    }
+  })
 </script>
 
 <template>
-  <div class="page-container">
+  <div v-if="loading">⏳ 載入中...</div>
+  <div v-else-if="!quizStore.isInitialized">❌ 找不到該筆資料，請返回列表頁。</div>
+  <div v-else class="page-container">
     <Tablelist
       title="測驗題目管理"
       :total="filteredData.length"
@@ -117,11 +104,9 @@
       :show-category-filter="true"
       v-model:category="selectedCategory"
       all-label="全部題目"
-      :page-size="8"
+      :page-size="7"
     >
       <template #default="scope">
-        <!-- 這裡的 min-width 是觸發子元件滾動的條件 -->
-
         <el-table :data="scope.data" prop="quiz_id" stripe style="width: 100%">
           <el-table-column prop="question_description" label="題目" width="600" align="center">
             <template #default="{ row }">
@@ -141,16 +126,16 @@
           </el-table-column>
 
           <el-table-column label="編輯" width="80" align="center">
-            <template #default="scope">
-              <el-button link type="primary" @click="handleEdit(scope.row)">
+            <template #default="{ row }">
+              <el-button link type="primary" @click="handleEdit(row)">
                 <el-icon><Edit /></el-icon>
               </el-button>
             </template>
           </el-table-column>
 
           <el-table-column label="刪除" width="80" align="center">
-            <template #default="scope">
-              <el-button link type="danger" @click="handleDelete(scope.row)">
+            <template #default="{ row }">
+              <el-button link type="danger" @click="handleDelete(row)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </template>

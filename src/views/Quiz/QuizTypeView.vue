@@ -1,6 +1,6 @@
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue'
-  import { Edit, Delete } from '@element-plus/icons-vue'
+  import { Edit } from '@element-plus/icons-vue'
   import { useRouter } from 'vue-router'
   import { ElMessageBox, ElMessage } from 'element-plus'
   import Tablelist from '@/components/tablelist.vue'

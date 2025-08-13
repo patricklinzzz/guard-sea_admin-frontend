@@ -111,6 +111,8 @@
       return null
     }
 
+    const baseUrl = import.meta.env.VITE_API_BASE
+
     return {
       toolbar: {
         items: [
@@ -182,7 +184,7 @@
 
       simpleUpload: {
         // 這裡填寫您後端用來處理圖片上傳的 PHP 檔案的完整 URL
-        uploadUrl: 'http://localhost:8888/guard-sea-api/upload_image.php',
+        uploadUrl: `${baseUrl}/ckeditor.php`,
         // 您也可以在這裡設定 headers，例如傳遞 token
         // headers: {
         //   'Authorization': 'Bearer <YOUR_TOKEN>'

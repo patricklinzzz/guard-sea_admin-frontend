@@ -3,6 +3,7 @@
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 
 export const useNewStore = defineStore('new', () => {
   const newData = ref([])
@@ -109,54 +110,77 @@ export const useNewStore = defineStore('new', () => {
 
   //以下是真正從API載入資料
 
-  const fetchnewData = async () => {
-    // 如果兩份資料都已經有了，就直接返回
-    if (newData.value.length > 0 && categories.value.length > 0) {
+  const fetchnewData = async (forceRefresh = false) => {
+    // 只有在「非」強制刷新模式下，才啟用快取保護
+    if (!forceRefresh && newData.value.length > 0 && categories.value.length > 0) {
       return
     }
 
     fetchError.value = null
     try {
-      // 1. 從環境變數讀取 API 的基礎路徑
       const baseUrl = import.meta.env.VITE_API_BASE
-
-      // 2. 拼接出完整的 API 端點 URL
-      const apiUrl = `${baseUrl}/get_news.php`
-      // const apiUrl = 'http://localhost:8888/guard-sea-api/get_news.php'
+      const apiUrl = `${baseUrl}/news/get_news.php`
       const response = await axios.get(apiUrl)
-
-      // 從返回的物件中，分別取出 news 和 categories
       newData.value = response.data.news
       categories.value = response.data.categories
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
       console.error('Fetch 錯誤：', err)
+      throw new Error(fetchError.value)
     }
   }
 
-  //  新增資料
-  const addNews = (newsItem) => {
-    // 1. 找到對應的分類物件
-    //    從 categories 陣列中，找到 id 和傳入的 newsItem.category_id 匹配的那個分類
-    const category = categories.value.find((cat) => cat.category_id === newsItem.category_id)
+  //  新增資料start-------------------------------------------------------------------------------------------------
 
-    // 2. 計算新的 ID
-    //    (這裡有一個小 bug，您在計算 newId 時還在使用 i.id，應該是 i.news_id)
-    const newId =
-      newData.value.length > 0 ? Math.max(...newData.value.map((i) => i.news_id)) + 1 : 1
+  //舊的無api模擬版------------start
+  // const addNews = (newsItem) => {
+  //   // 1. 找到對應的分類物件
+  //   //    從 categories 陣列中，找到 id 和傳入的 newsItem.category_id 匹配的那個分類
+  //   const category = categories.value.find((cat) => cat.category_id === newsItem.category_id)
 
-    // 3. 組合出一個「結構完整」的新項目
-    const item = {
-      ...newsItem,
-      news_id: newId,
-      // ***【核心修改】***
-      // 如果找到了分類，就把它的名稱加進去；如果沒找到，就給個空字串
-      category_name: category ? category.category_name : '',
+  //   // 2. 計算新的 ID
+  //   //    (這裡有一個小 bug，您在計算 newId 時還在使用 i.id，應該是 i.news_id)
+  //   const newId =
+  //     newData.value.length > 0 ? Math.max(...newData.value.map((i) => i.news_id)) + 1 : 1
+
+  //   // 3. 組合出一個「結構完整」的新項目
+  //   const item = {
+  //     ...newsItem,
+  //     news_id: newId,
+  //     // ***【核心修改】***
+  //     // 如果找到了分類，就把它的名稱加進去；如果沒找到，就給個空字串
+  //     category_name: category ? category.category_name : '',
+  //   }
+
+  //   // 4. 將完整的新項目加到陣列最前面
+  //   newData.value = [item, ...newData.value]
+  // }
+
+  //舊的無api模擬版------------end
+
+  // 新增資料連接真實後端 API 的版本===============================
+  // 參數現在會接收一個 FormData 物件
+  const addNews = async (formData) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE
+      const apiUrl = `${baseUrl}/news/post_new.php`
+      const response = await axios.post(apiUrl, formData)
+
+      if (response.data && response.data.success) {
+        ElMessage.success(response.data.message || '新增成功！')
+        // *** 關鍵修改：呼叫 fetchnewData 並傳入 true，強制它獲取最新資料 ***
+        await fetchnewData(true)
+      } else {
+        throw new Error(response.data.message || '後端處理失敗')
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || '新增操作失敗'
+      ElMessage.error(errorMessage)
+      throw new Error(errorMessage)
     }
-
-    // 4. 將完整的新項目加到陣列最前面
-    newData.value = [item, ...newData.value]
   }
+
+  //  新增資料end=====================================================
 
   //  編輯資料
   const updateNews = (id, updatedData) => {

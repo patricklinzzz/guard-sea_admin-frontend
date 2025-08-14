@@ -215,7 +215,7 @@
         if (coverImageFile.value) {
           formData.append('cover_image', coverImageFile.value)
         }
-        // await newStore.updateNews(formData) // <-- 未來編輯功能的呼叫
+        await newStore.updateNews(formData) // <-- 編輯功能的呼叫
       } else {
         // --- 新增模式 ---
         formData.append('cover_image', coverImageFile.value)

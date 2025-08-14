@@ -11,6 +11,8 @@ const activityList = ref([
         name: '王大陸',
         email: 'jay3234222@gmail.com',
         phone: '08839324311',
+        contact_person: '王媽媽',
+        contact_phone: '0912345678',
         notes: '無',
     },
     {
@@ -18,6 +20,8 @@ const activityList = ref([
         name: '陳零九',
         email: 'jay3234222@gmail.com',
         phone: '08839324311',
+        contact_person: '陳爸爸',
+        contact_phone: '0987654321',
         notes: '不希望出現在公開攝影紀錄中，請協助避拍',
     },
     {
@@ -25,6 +29,8 @@ const activityList = ref([
         name: '陳大天',
         email: 'jay3234222@gmail.com',
         phone: '08839324311',
+        contact_person: '',
+        contact_phone: '',
         notes: '無',
     },
     {
@@ -32,6 +38,8 @@ const activityList = ref([
         name: '大根',
         email: 'jay3234222@gmail.com',
         phone: '08839324311',
+        contact_person: '大根姊姊',
+        contact_phone: '0955555555',
         notes: '聽力障礙者參加，會自行攜帶輔具工具',
     },
     {
@@ -39,6 +47,8 @@ const activityList = ref([
         name: '大根',
         email: 'jay3234222@gmail.com',
         phone: '08839324311',
+        contact_person: '大根姊姊',
+        contact_phone: '0955555555',
         notes: '無',
     },
     ])
@@ -76,6 +86,8 @@ const activityList = ref([
                 <el-table-column prop="name" label="姓名" min-width="150" align="center" />
                 <el-table-column prop="email" label="Email" min-width="250" />
                 <el-table-column prop="phone" label="電話" min-width="180" align="center" />
+                <el-table-column prop="contact_person" label="緊急連絡人" min-width="150" align="center" />
+                <el-table-column prop="contact_phone" label="緊急連絡人電話" min-width="180" align="center" />
                 <el-table-column prop="notes" label="備註" min-width="300" />
             </el-table>
             </template>

@@ -4,19 +4,29 @@ import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', () => {
   const admins = ref([])
-
+  //獲取管理員資料
   const fetchAdmins = async () => {
     try {
-      const res = await axios.get('https://tibamef2e.com/cjd101/g1/api/admins/get_admins.php')
+      const res = await axios.get('http://localhost:8888/api/admins/get_admins.php')
       admins.value = res.data
       console.log('Admin data fetched successfully:', admins.value)
     } catch (error) {
       console.log(error)
     }
   }
-
-  const addAdmin = (adminData) => {
-    admins.value.unshift(adminData)
+  //新增管理員
+  const addAdmin = async (adminData) => {
+    try {
+      const response = await axios.post('http://localhost:8888/api/admins/add_admin.php',adminData)
+      if (response.data.success) {
+        console.log('管理員新增成功:', response.data.message)
+        await fetchAdmins() 
+      } else {
+        throw new Error(response.data.error || response.data.message || '後端新增失敗')
+      }
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const getAdminById = (id) => {
@@ -33,16 +43,12 @@ export const useAdminStore = defineStore('admin', () => {
   //管理員狀態
   const updateAdminStatus = async (adminId, newStatus) => {
     try {
-      const formData = new FormData()
-      formData.append('administrator_id', adminId) 
-      formData.append('status', newStatus)
-
       const response = await axios.post(
-        'https://tibamef2e.com/cjd101/g1/api/admins/update_admin_status.php', 
-        formData
+        'http://localhost:8888/api/admins/update_admin_status.php',
+        { id: adminId, status: newStatus }
       )
       if (response.data.success) {
-        await fetchAdmins() 
+        await fetchAdmins()
       } else {
         console.error(response.data.error)
       }

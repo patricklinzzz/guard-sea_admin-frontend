@@ -109,9 +109,7 @@ export const useNewStore = defineStore('new', () => {
   // }
 
   //以下是真正從API載入資料
-
   const fetchnewData = async (forceRefresh = false) => {
-    // 只有在「非」強制刷新模式下，才啟用快取保護
     if (!forceRefresh && newData.value.length > 0 && categories.value.length > 0) {
       return
     }
@@ -121,7 +119,21 @@ export const useNewStore = defineStore('new', () => {
       const baseUrl = import.meta.env.VITE_API_BASE
       const apiUrl = `${baseUrl}/news/get_news.php`
       const response = await axios.get(apiUrl)
-      newData.value = response.data.news
+
+      // 在存入 state 前，處理圖片路徑
+      const processedNews = response.data.news.map((item) => {
+        // 檢查 image_url 是否存在，並且是一個相對路徑 (以 '/' 開頭)
+        if (item.image_url && item.image_url.startsWith('/')) {
+          return {
+            ...item,
+            image_url: baseUrl + item.image_url, // 拼接成完整 URL
+          }
+        }
+        // 如果 image_url 不符合條件 (例如 null 或已經是完整的 http 路徑)，直接返回
+        return item
+      })
+
+      newData.value = processedNews
       categories.value = response.data.categories
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
@@ -130,9 +142,9 @@ export const useNewStore = defineStore('new', () => {
     }
   }
 
-  //  新增資料start-------------------------------------------------------------------------------------------------
+  //  新增資料start====================================================================
 
-  //舊的無api模擬版------------start
+  //新增資料-舊的無api模擬版------------start
   // const addNews = (newsItem) => {
   //   // 1. 找到對應的分類物件
   //   //    從 categories 陣列中，找到 id 和傳入的 newsItem.category_id 匹配的那個分類
@@ -156,9 +168,9 @@ export const useNewStore = defineStore('new', () => {
   //   newData.value = [item, ...newData.value]
   // }
 
-  //舊的無api模擬版------------end
+  //新增資料-舊的無api模擬版------------end
 
-  // 新增資料連接真實後端 API 的版本===============================
+  // 新增資料連接真實後端 API 的版本###############################################
   // 參數現在會接收一個 FormData 物件
   const addNews = async (formData) => {
     try {
@@ -180,22 +192,139 @@ export const useNewStore = defineStore('new', () => {
     }
   }
 
-  //  新增資料end=====================================================
+  //  新增資料end====================================================================
 
-  //  編輯資料
-  const updateNews = (id, updatedData) => {
-    const targetId = Number(id)
-    const index = newData.value.findIndex((i) => i.news_id === targetId)
-    if (index !== -1) {
-      // 這種寫法可以確保響應性
-      newData.value[index] = { ...newData.value[index], ...updatedData }
+  //  編輯資料start====================================================================
+
+  //  編輯資料-舊的無api模擬版 用本身假資料------------start
+  // const updateNews = (id, updatedData) => {
+  //   const targetId = Number(id)
+  //   const index = newData.value.findIndex((i) => i.news_id === targetId)
+  //   if (index !== -1) {
+  //     // 這種寫法可以確保響應性
+  //     newData.value[index] = { ...newData.value[index], ...updatedData }
+  //   }
+  // }
+
+  //  編輯資料-舊的無api模擬版------------end
+
+  // 編輯資料連接真實後端 API 的版本###############################################
+
+  const updateNews = async (formData) => {
+    const newsId = Number(formData.get('news_id'))
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE
+      const apiUrl = `${baseUrl}/news/path_new.php`
+
+      const response = await axios.post(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      if (response.data && response.data.success) {
+        ElMessage.success(response.data.message || '更新成功！')
+
+        const index = newData.value.findIndex((item) => item.news_id === newsId)
+        if (index !== -1) {
+          const updatedItemData = response.data.updated_data
+          const oldItem = newData.value[index]
+
+          // 處理分類名稱 (這部分邏輯不變)
+          let newCategoryName = oldItem.category_name
+          if (updatedItemData.category_id !== undefined) {
+            const newCategory = categories.value.find(
+              (cat) => cat.category_id === updatedItemData.category_id
+            )
+            newCategoryName = newCategory ? newCategory.category_name : '未知分類'
+          }
+
+          // 【新增的邏輯】處理圖片 URL
+          // 預設圖片路徑是舊的 URL
+          let finalImageUrl = oldItem.image_url
+          // 檢查後端是否回傳了新的 image_url
+          if (updatedItemData.image_url) {
+            // 如果回傳的是相對路徑，就拼接成完整 URL
+            if (updatedItemData.image_url.startsWith('/')) {
+              finalImageUrl = baseUrl + updatedItemData.image_url
+            } else {
+              // 如果回傳的不是相對路徑 (可能是舊資料的完整路徑)，就直接使用
+              finalImageUrl = updatedItemData.image_url
+            }
+          }
+
+          // 組合最終的更新物件
+          const finalUpdatedItem = {
+            ...oldItem,
+            ...updatedItemData,
+            category_name: newCategoryName,
+            image_url: finalImageUrl, // <-- 使用我們剛剛處理好的、完整的圖片 URL
+          }
+
+          // 用最終組合好的、資料完整的物件，替換掉 state 陣列中的舊項目
+          newData.value[index] = finalUpdatedItem
+        }
+      } else {
+        throw new Error(response.data.message || '後端更新失敗')
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || error.message || '更新操作時發生未知錯誤'
+      ElMessage.error(errorMessage)
+      throw error
+    }
+  }
+  //  編輯資料end====================================================================
+
+  //  刪除資料start====================================================================
+
+  //  刪除資料-舊的無api模擬版------------start
+  // const deleteNews = (id) => {
+  //   newData.value = newData.value.filter((item) => item.news_id !== id)
+  // }
+  //  刪除資料-舊的無api模擬版------------end
+
+  //刪除資料連接真實後端 API 的版本###############################################
+
+  const deleteNews = async (id) => {
+    try {
+      // 1. 組合 API 的 URL
+      const baseUrl = import.meta.env.VITE_API_BASE
+      const apiUrl = `${baseUrl}/news/delete_new.php`
+
+      // 2. 使用 axios 發送 DELETE 請求
+      //    對於 DELETE 請求，若要傳遞 body，需要放在 config 物件的 `data` 屬性中
+      const response = await axios.delete(apiUrl, {
+        data: { news_id: id },
+      })
+
+      // 3. 處理後端回應
+      if (response.data && response.data.success) {
+        // 3a. 如果後端成功刪除，顯示成功訊息
+        ElMessage.success(response.data.message || '刪除成功！')
+
+        // 3b. 從前端的 state (newData.value) 中移除這筆資料，UI 會即時更新
+        //     這是最高效的方式，避免了重新向後端請求整個列表
+        const targetId = Number(id)
+        newData.value = newData.value.filter((item) => item.news_id !== targetId)
+      } else {
+        // 如果後端回應 success: false，主動拋出錯誤
+        throw new Error(response.data.message || '後端處理失敗')
+      }
+    } catch (error) {
+      // 4. 捕捉所有錯誤 (網路錯誤、後端錯誤等)
+      //    從 error 物件中提取最精確的錯誤訊息
+      const errorMessage =
+        error.response?.data?.message || error.message || '刪除操作時發生未知錯誤'
+      ElMessage.error(errorMessage)
+
+      // 再次拋出錯誤，讓呼叫此函式的 Vue 元件也能知道操作失敗了
+      throw error
     }
   }
 
-  //  刪除資料
-  const deleteNews = (id) => {
-    newData.value = newData.value.filter((item) => item.news_id !== id)
-  }
+  //  刪除資料end====================================================================
 
   return {
     newData,

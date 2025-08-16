@@ -12,14 +12,14 @@
   const selectedCategory = ref('all')
   const searchText = ref('')
   const allTableData = ref([])
-  const searchKey = ref('title')
   const fetchError = ref(null)
+  const baseUrl = import.meta.env.VITE_API_BASE
 
   const editingState = ref(new Map())
   const fetchTableData = async () => {
     fetchError.value = null
     try {
-      const apiUrl = 'http://localhost:8888/php/api/quiz/get_quiz.php'
+      const apiUrl = `${baseUrl}/quiz/get_quiz.php`
       const response = await axios.get(apiUrl)
       allTableData.value = response.data
     } catch (err) {
@@ -47,7 +47,7 @@
 
   const handleSubmit = async (row) => {
     try {
-      const apiUrl = 'http://localhost:8888/php/api/quiz/patch_quiz.php'
+      const apiUrl = `${baseUrl}/quiz/patch_quiz.php`
       const response = await axios.patch(apiUrl, row)
       console.log('Quiz edit successfully:', response.data)
     } catch (err) {

@@ -8,15 +8,22 @@ export const useQuizStore = defineStore('quiz', () => {
   const fetchError = ref(null)
   const isInitialized = ref(false)
   const quiz_map = {}
+  const baseUrl = import.meta.env.VITE_API_BASE
 
   const fetchAllQuizzes = async () => {
     // Simulate an API call with a delay
     console.log('Simulating API call to fetch quizzes...')
     try {
-      const apiUrl = 'http://localhost:8888/php/api/questions/get_questions.php'
-      const response = await axios.get(apiUrl)
-      quizzes.value = response.data.questions
-      quiz_title.value = response.data.quiz_title
+      const question_api = `${baseUrl}/questions/get_questions.php`
+      const quiz_api = `${baseUrl}/quiz/get_quiz.php`
+
+      const questions = await axios.get(question_api)
+      quizzes.value = questions.data
+
+      console.log(quizzes.value)
+
+      const quiz = await axios.get(quiz_api)
+      quiz_title.value = quiz.data
       quiz_title.value.reduce((map, quiz_cur) => {
         map[quiz_cur.quiz_id] = quiz_cur.title
         return map
@@ -34,7 +41,7 @@ export const useQuizStore = defineStore('quiz', () => {
     if (quiz) {
       const nextId = quiz.length > 0 ? Math.max(...quiz.map((q) => q.question_id)) + 1 : 1
       try {
-        const apiUrl = 'http://localhost:8888/php/api/questions/post_questions.php'
+        const apiUrl = `${baseUrl}/questions/post_questions.php`
         const response = await axios.post(apiUrl, newQuestion)
         console.log('Quiz created successfully:', response.data)
       } catch (err) {
@@ -49,7 +56,7 @@ export const useQuizStore = defineStore('quiz', () => {
     const quiz = quizzes.value
     if (quiz) {
       try {
-        const apiUrl = `http://localhost:8888/php/api/questions/delete_questions.php?question_id=${q_id}`
+        const apiUrl = `${baseUrl}/questions/delete_questions.php?question_id=${q_id}`
         const response = await axios.delete(apiUrl)
         console.log('question deleted successfully:', response.data.result)
 
@@ -64,7 +71,7 @@ export const useQuizStore = defineStore('quiz', () => {
   const editQuestion = async (newQuestion) => {
     const quiz = quizzes.value
     try {
-      const apiUrl = 'http://localhost:8888/php/api/questions/patch_questions.php'
+      const apiUrl = `${baseUrl}/questions/patch_questions.php`
       const response = await axios.patch(apiUrl, newQuestion)
       console.log('Quiz edit successfully:', response.data)
     } catch (err) {

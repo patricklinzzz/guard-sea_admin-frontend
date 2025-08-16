@@ -2,32 +2,38 @@
   import { ref, reactive, computed, onMounted, watch } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { Plus, Close, Check } from '@element-plus/icons-vue'
+  import { ElMessage, ElMessageBox } from 'element-plus'
   import CKEditorComponent from '@/components/ckeditor.vue'
   import { useProductStore } from '@/stores/product_store.js'
+  import { useProductCategoryStore } from '@/stores/product_category_store.js'
 
   const route = useRoute()
   const router = useRouter()
   const productStore = useProductStore()
+  const categoryStore = useProductCategoryStore()
 
   const isEditMode = computed(() => !!route.params.id)
   const pageTitle = computed(() => (isEditMode.value ? '編輯商品' : '新增商品'))
 
   const isSubmitting = ref(false)
-
   const isFormLoading = computed(() => productStore.isFormLoading)
   const formError = computed(() => productStore.formError)
+  const isUploading = ref(false)
+  const isGeneratingSku = ref(false)
 
   const getInitialForm = () => ({
-    id: null,
+    product_id: null,
     sku: '',
     name: '',
     description: '',
+    content: '',
     price: 0,
-    mainImageUrl: '',
-    category: '',
+    main_image_url: '',
+    size: [],
+    colors: [], 
+    category_id: null,
     status: '上架',
     styles: [],
-    sizes: [],
   })
   const form = reactive(getInitialForm())
 
@@ -38,53 +44,112 @@
   }
 
   const handleFileChange = (uploadFile) => {
+    if (!uploadFile.raw) {
+      return
+    }
     const newStyle = {
       uid: uploadFile.uid,
       colorName: '',
-      colorCode: '#409EFF',
       imageUrl: URL.createObjectURL(uploadFile.raw),
       fileName: uploadFile.name,
-      rawFile: uploadFile,
+      rawFile: uploadFile.raw,
+      isNew: true,
     }
     form.styles.push(newStyle)
+    ElMessage.success('圖片已選取！')
+    if (form.styles.length === 1) {
+      setAsMainImage(newStyle)
+    }
   }
 
-  const removeStyle = (index) => {
+  const removeStyle = async (index) => {
     const styleToRemove = form.styles[index]
     if (styleToRemove) {
-      if (styleToRemove.rawFile) {
-        uploadRef.value.handleRemove(styleToRemove.rawFile)
+      try {
+        await ElMessageBox.confirm('確定要移除這張圖片嗎？', '警告', {
+          confirmButtonText: '確定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+        form.styles.splice(index, 1)
+        if (form.main_image_url === styleToRemove.imageUrl) {
+          form.main_image_url = ''
+        }
+        ElMessage.success('圖片已移除！')
+      } catch (e) {
+        if (e === 'cancel') {
+          return
+        }
+        console.error('移除圖片失敗:', e)
+        ElMessage.error('移除圖片失敗，請稍後再試。')
       }
-      form.styles.splice(index, 1)
     }
   }
 
   const setAsMainImage = (style) => {
-    form.mainImageUrl = style.imageUrl
+    form.main_image_url = style.imageUrl
   }
 
   const editorConfig = { height: '500px' }
 
   watch(
-    () => form.category,
-    async (newCategory) => {
-      if (newCategory && !isEditMode.value) {
-        form.sku = '生成中...' 
+    () => form.category_id,
+    async (newCategoryId) => {
+      if (newCategoryId && !isEditMode.value) {
+        isGeneratingSku.value = true
+        form.sku = '生成中...'
         try {
-          const newSku = await productStore.generateNextSku(newCategory)
-          form.sku = newSku
+          const newCategory = categoryStore.categories.find(
+            (c) => Number(c.category_id) === newCategoryId
+          )?.category_name
+          if (newCategory) {
+            const newSku = await productStore.generateNextSku(newCategory)
+            form.sku = newSku
+          }
         } catch (error) {
           console.error('無法生成商品編號:', error)
           form.sku = '生成失敗，請稍後重試'
+        } finally {
+          isGeneratingSku.value = false
         }
       }
     }
   )
+
   watch(
     () => productStore.currentProduct.data,
     (newProductData) => {
       if (newProductData) {
-        Object.assign(form, JSON.parse(JSON.stringify(newProductData)))
+        const sizeArray = newProductData.size ? String(newProductData.size).split(',') : []
+        const colorsArray = newProductData.color_code
+          ? String(newProductData.color_code).split(',')
+          : []
+        const backendBaseUrl = 'http://localhost:8888/guard-sea_api'
+
+        const imageUrls = [
+          newProductData.main_image_url,
+          newProductData.sub_image_1,
+          newProductData.sub_image_2,
+          newProductData.sub_image_3,
+        ].filter((url) => url && url.length > 0)
+
+        const stylesFromBackend = [...new Set(imageUrls)].map((url, index) => ({
+          uid: `backend-${index}-${Date.now()}`,
+          imageUrl: `${backendBaseUrl}${url}`,
+          fileName: url.substring(url.lastIndexOf('/') + 1),
+          isNew: false,
+          backendPath: url,
+        }))
+
+        Object.assign(form, {
+          ...newProductData,
+          price: Number(newProductData.price),
+          category_id: Number(newProductData.category_id),
+          status: Number(newProductData.status) === 1 ? '上架' : '下架',
+          size: sizeArray,
+          styles: stylesFromBackend,
+          colors: colorsArray, 
+        })
       } else {
         Object.assign(form, getInitialForm())
       }
@@ -99,27 +164,73 @@
     } else {
       productStore.clearCurrentProduct()
     }
+    productStore.fetchProducts()
+    categoryStore.fetchCategories()
   })
 
+  // 新增一個顏色輸入框
+  const addColor = () => {
+    form.colors.push('#FFFFFF')
+  }
+
+  const removeColor = (index) => {
+    form.colors.splice(index, 1)
+  }
+
   const handleSubmit = async () => {
-    if (isSubmitting.value) return
+    if (isSubmitting.value || isGeneratingSku.value) return
     isSubmitting.value = true
 
-    if (!form.mainImageUrl && form.styles.length > 0) {
-      form.mainImageUrl = form.styles[0].imageUrl
+    const formData = new FormData()
+
+    formData.append('product_id', form.product_id || '')
+    formData.append('sku', form.sku || '')
+    formData.append('name', form.name || '')
+    formData.append('price', String(form.price) || '0')
+    formData.append('description', form.description || '')
+    formData.append('content', form.content || '')
+    formData.append('category_id', String(form.category_id) || '')
+    formData.append('status', String(form.status === '上架' ? 1 : 0) || '0')
+    formData.append('size', form.size && form.size.length > 0 ? form.size.join(',') : '')
+    formData.append('color_code', form.colors.length > 0 ? form.colors.join(',') : '') // 關鍵修正：將顏色陣列轉換為字串
+
+    const newFiles = form.styles.filter((s) => s.isNew)
+    const existingImages = form.styles.filter((s) => !s.isNew)
+    const mainImage =
+      newFiles.find((s) => s.imageUrl === form.main_image_url) ||
+      existingImages.find((s) => s.imageUrl === form.main_image_url)
+
+    if (mainImage?.isNew) {
+      formData.append('main_image_file', mainImage.rawFile)
+    } else if (mainImage?.backendPath) {
+      formData.append('main_image_url', mainImage.backendPath)
+    } else {
+      formData.append('main_image_url', '')
     }
+
+    const subImages = form.styles.filter((s) => s !== mainImage)
+    subImages.forEach((sub, index) => {
+      if (sub.isNew) {
+        formData.append(`sub_image_${index + 1}_file`, sub.rawFile)
+      } else if (sub.backendPath) {
+        formData.append(`sub_image_${index + 1}_url`, sub.backendPath)
+      } else {
+        formData.append(`sub_image_${index + 1}_url`, '')
+      }
+    })
 
     try {
       if (isEditMode.value) {
-        await productStore.updateProduct(form)
+        formData.append('_method', 'PUT')
+        await productStore.updateProduct(formData)
       } else {
-        await productStore.addProduct(form)
+        await productStore.addProduct(formData)
       }
-      alert('儲存成功！')
+      ElMessage.success('儲存成功！')
       router.push({ name: 'productlist' })
     } catch (error) {
       console.error('儲存失敗:', error)
-      alert('儲存失敗，請查看 Console。')
+      ElMessage.error(error.message || '儲存失敗，請查看 Console。')
     } finally {
       isSubmitting.value = false
     }
@@ -128,6 +239,13 @@
   const handleCancel = () => {
     router.back()
   }
+
+  const categoryOptions = computed(() => {
+    return categoryStore.categories.map((cat) => ({
+      label: cat.category_name,
+      value: Number(cat.category_id),
+    }))
+  })
 </script>
 
 <template>
@@ -135,23 +253,23 @@
     <header class="page-header">
       <h1 class="page-title">{{ pageTitle }}</h1>
     </header>
-
     <div v-if="isFormLoading" class="loading-text">⏳ 載入中...</div>
     <div v-else-if="formError" class="error-text">❌ {{ formError }}</div>
-
     <el-form v-else :model="form" label-position="top">
       <el-form-item label="商品編號">
         <el-input v-model="form.sku" :disabled="true" placeholder="選擇分類後自動生成" />
       </el-form-item>
       <el-form-item label="商品分類">
-        <el-select v-model="form.category" placeholder="-選擇類型-">
-          <el-option label="機能服飾" value="機能服飾" />
-          <el-option label="各類包款" value="各類包款" />
-          <el-option label="周邊小物" value="周邊小物" />
+        <el-select v-model="form.category_id" placeholder="-選擇類型-" style="width: 100%">
+          <el-option
+            v-for="cat in categoryOptions"
+            :key="cat.value"
+            :label="cat.label"
+            :value="cat.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="商品名稱"><el-input v-model="form.name" /></el-form-item>
-
       <el-form-item label="商品圖片">
         <div class="custom-uploader-container">
           <el-upload
@@ -166,39 +284,34 @@
           />
           <div class="uploader-trigger" @click="triggerUpload">
             <el-icon><Plus /></el-icon>
-            <span>上傳檔案</span>
+            <span>{{ isUploading ? '上傳中...' : '上傳檔案' }}</span>
           </div>
           <div v-for="(style, index) in form.styles" :key="style.uid" class="preview-item">
             <el-image :src="style.imageUrl" fit="cover" class="preview-image" />
             <span class="preview-filename" :title="style.fileName">{{ style.fileName }}</span>
-            <button class="remove-btn" @click="removeStyle(index)">
+            <button class="remove-btn" @click.prevent="removeStyle(index)">
               <el-icon><Close /></el-icon>
             </button>
           </div>
         </div>
         <div class="styles-details-container" v-if="form.styles.length > 0">
           <div
-            v-for="style in form.styles"
+            v-for="(style, index) in form.styles"
             :key="style.uid"
             class="style-detail-item"
-            :class="{ 'is-main': style.imageUrl === form.mainImageUrl && style.imageUrl }"
+            :class="{ 'is-main': style.imageUrl === form.main_image_url && style.imageUrl }"
           >
             <el-image :src="style.imageUrl" fit="cover" class="detail-thumbnail" />
             <div class="color-inputs">
-              <el-input
-                v-model="style.colorCode"
-                placeholder="顏色代碼"
-                size="small"
-                :disabled="true"
-              />
-              <el-color-picker v-model="style.colorCode" size="small" />
+              <el-input v-model="form.colors[index]" placeholder="顏色代碼" size="small" />
+              <el-color-picker v-model="form.colors[index]" size="small" />
             </div>
             <el-button
               v-if="style.imageUrl"
-              :disabled="style.imageUrl === form.mainImageUrl"
+              :disabled="style.imageUrl === form.main_image_url"
               size="small"
               class="set-main-btn"
-              @click="setAsMainImage(style)"
+              @click.prevent="setAsMainImage(style)"
               :icon="Check"
             >
               設為主圖
@@ -206,7 +319,6 @@
           </div>
         </div>
       </el-form-item>
-
       <el-form-item label="商品價格">
         <el-input-number v-model="form.price" :min="0" controls-position="right" />
       </el-form-item>
@@ -222,7 +334,7 @@
       </el-form-item>
       <el-form-item label="可用尺寸">
         <el-select
-          v-model="form.sizes"
+          v-model="form.size"
           multiple
           filterable
           allow-create
@@ -232,19 +344,22 @@
         />
       </el-form-item>
       <el-form-item label="商品內容">
-        <CKEditorComponent v-model="form.description" :config="editorConfig" />
+        <CKEditorComponent v-model="form.content" :config="editorConfig" />
       </el-form-item>
-
       <el-form-item class="form-actions">
         <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
+        <el-button
+          type="primary"
+          @click="handleSubmit"
+          :loading="isSubmitting"
+          :disabled="isGeneratingSku || isSubmitting"
+        >
           {{ isEditMode ? '儲存' : '新增' }}
         </el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
-
 <style lang="scss" scoped>
   .page-container {
     padding: 2rem;

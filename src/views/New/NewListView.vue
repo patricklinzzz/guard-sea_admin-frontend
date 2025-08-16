@@ -53,7 +53,12 @@
               <div
                 style="display: flex; justify-content: center; align-items: center; height: 100%"
               >
-                <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
+                <el-select
+                  v-model="scope.row.status"
+                  size="small"
+                  style="min-width: 100px"
+                  @change="handleStatusChange(scope.row)"
+                >
                   <el-option label="顯示" :value="1" />
                   <el-option label="不顯示" :value="0" />
                 </el-select>
@@ -155,24 +160,77 @@
     router.push({ name: 'newedit', params: { id: row.news_id } })
   }
 
-  // 刪除資料
-  const handleDelete = async (row) => {
+  //讓列表頁顯示不顯示的狀態觸發能真正影響資料庫存放的狀態
+
+  const handleStatusChange = async (row) => {
+    // 這個 row 物件就是 Element Plus Table 傳過來的整筆資料，
+    // 因為 v-model 的關係，row.status 此時已經是使用者選擇的新狀態了。
+
+    console.log(`準備更新 ID: ${row.news_id} 的狀態為: ${row.status}`)
+
     try {
-      await ElMessageBox.confirm('確定要刪除嗎？', {
-        confirmButtonText: '確定',
+      // 步驟 1: 建立一個 FormData 物件，準備發送到後端
+      const formData = new FormData()
+
+      // 步驟 2: 把必要資訊放進去。
+      // 根據我們修改後的 path_new.php，它只需要知道要改哪一筆 (news_id)
+      // 和要改哪個欄位 (status) 就夠了，非常高效！
+      formData.append('news_id', row.news_id)
+      formData.append('status', row.status)
+
+      // 我們並不需要傳送 title, content 等其他欄位
+
+      // 步驟 3: 呼叫 Pinia Store 中的 updateNews action
+      await newStore.updateNews(formData)
+    } catch (error) {
+      // 如果 Pinia action 拋出錯誤 (例如網路中斷、API 報錯)
+      console.error('在列表頁更新狀態時失敗:', error)
+
+      // 為了保持前端畫面和資料庫的資料一致性，
+      // 更新失敗時，最簡單的方式是強制重新從伺服器獲取一次最新資料，
+      // 這樣可以將剛剛在前端被改錯的狀態覆蓋回來。
+      await newStore.fetchnewData(true)
+
+      ElMessage.error('狀態更新失敗，已還原。')
+    }
+  }
+
+  // 刪除資料
+  const handleDelete = (row) => {
+    // 1. 使用 ElMessageBox.confirm 詢問使用者
+    ElMessageBox.confirm(
+      `您確定要永久刪除消息「${row.title}」嗎？此操作無法復原。`, // 提示文字可以更明確
+      '警告',
+      {
+        confirmButtonText: '確定刪除',
         cancelButtonText: '取消',
         type: 'warning',
-      })
-      // 呼叫 Pinia store 的 deleteNews 方法來刪除資料
-      newStore.deleteNews(row.news_id)
+      }
+    )
+      .then(async () => {
+        // 2. 當使用者點擊「確定刪除」後，這個 .then() 區塊會執行
+        try {
+          // 3. 在 try 區塊中，呼叫 store 的 action，並且「等待」它完成
+          await newStore.deleteNews(row.news_id)
 
-      ElMessage({
-        type: 'success',
-        message: '刪除成功！',
+          // 4. 因為 store 內部成功時已經會顯示 ElMessage，
+          //    所以元件本身不需要再顯示成功訊息，避免重複。
+          //    如果 store 發生錯誤，會拋出 error，程式碼不會執行到這裡。
+        } catch (error) {
+          // 5. 如果 newStore.deleteNews() 內部發生任何錯誤 (網路、後端等)，
+          //    這個 catch 會捕捉到它。
+          //    store 內部已經用 ElMessage.error 提示了，
+          //    這裡可以選擇性地在控制台留下更詳細的日誌，方便除錯。
+          console.error('在元件層捕捉到刪除失敗:', error)
+        }
       })
-    } catch (err) {
-      console.log('取消刪除', err)
-    }
+      .catch(() => {
+        // 6. 當使用者點擊「取消」或關閉對話框時，這個 .catch() 區塊會執行
+        ElMessage({
+          type: 'info',
+          message: '已取消刪除操作',
+        })
+      })
   }
 </script>
 

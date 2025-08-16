@@ -15,10 +15,18 @@
   >
     <template #default="{ data }">
       <el-table :data="data" style="width: 100%">
-        <el-table-column prop="id" label="員工編號" min-width="120" />
-        <el-table-column prop="name" label="姓名" min-width="160" />
+        <el-table-column prop="administrator_id" label="員工編號" min-width="120" />
+        <el-table-column prop="username" label="管理員帳號" min-width="160" />
         <el-table-column prop="email" label="Email" min-width="280" />
-        <el-table-column prop="phone" label="電話" min-width="160" />
+        <el-table-column prop="fullname" label="管理員姓名" min-width="160" />
+        <el-table-column label="管理員狀態" min-width="180" align="center">
+          <template #default="scope">
+            <el-select :model-value="scope.row.status" placeholder="選擇狀態" style="width: 110px" @change="handleStatusChange(scope.row.administrator_id,$event)">
+              <el-option label="啟用中" value="1"></el-option>
+              <el-option label="已停權" value="0"></el-option>
+            </el-select>
+          </template>
+        </el-table-column>
         <el-table-column label="編輯" width="80" align="center">
           <template #default="{ row }">
             <el-button link type="primary" @click="handleEdit(row)">
@@ -39,14 +47,15 @@
   import { useAdminStore } from '@/stores/admin_store'
 
   const router = useRouter()
-  const adminStore = useAdminStore()
+  const admin = useAdminStore()
+  admin.fetchAdmins()
 
   const currentPage = ref(1)
   const searchText = ref('')
   const searchKey = ref('name')
 
   const filteredData = computed(() => {
-    let data = [...adminStore.admins]
+    let data = [...admin.admins]
     if (searchText.value.trim()) {
       const keyword = searchText.value.trim().toLowerCase()
       const key = searchKey.value
@@ -67,7 +76,11 @@
   }
 
   const handleEdit = (row) => {
-    router.push({ name: 'adminedit', params: { id: row.id } })
+    router.push({ name: 'adminedit', params: { id: row.administrator_id } })
+  }
+
+  const handleStatusChange = async (adminId,newStatus)=>{
+    await admin.updateAdminStatus(adminId,newStatus)
   }
 </script>
 

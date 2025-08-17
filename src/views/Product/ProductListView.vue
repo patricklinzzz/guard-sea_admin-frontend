@@ -4,33 +4,48 @@
   import { useRouter } from 'vue-router'
   import Tablelist from '@/components/tablelist.vue'
   import { useProductStore } from '@/stores/product_store'
+  import { useProductCategoryStore } from '@/stores/product_category_store'
 
   const router = useRouter()
   const productStore = useProductStore()
+  const categoryStore = useProductCategoryStore()
 
   const currentPage = ref(1)
   const selectedCategory = ref('all')
+  const categoryOptions = ref([])
 
   onMounted(() => {
     productStore.fetchProducts()
+    categoryStore.fetchCategories()
   })
 
-  const categoryOptions = computed(() => {
-    const counts = {}
-    productStore.products.forEach((item) => {
-      counts[item.category] = (counts[item.category] || 0) + 1
-    })
-    return Object.entries(counts).map(([key, count]) => ({
-      label: key,
-      value: key,
-      count,
-    }))
-  })
+  watch(
+    [() => productStore.products, () => categoryStore.categories],
+    ([products, categories]) => {
+      if (products.length > 0 && categories.length > 0) {
+        const productCounts = {}
+        products.forEach((item) => {
+          const category = categories.find((c) => Number(c.category_id) === item.category_id)
+          if (category) {
+            productCounts[category.category_id] = (productCounts[category.category_id] || 0) + 1
+          }
+        })
+        const options = categories.map((cat) => ({
+          label: cat.category_name,
+          value: cat.category_id,
+          count: productCounts[cat.category_id] || 0,
+        }))
+
+        categoryOptions.value = options
+      }
+    },
+    { immediate: true }
+  )
 
   const filteredData = computed(() => {
     let data = [...productStore.products]
     if (selectedCategory.value !== 'all') {
-      data = data.filter((item) => item.category === selectedCategory.value)
+      data = data.filter((item) => Number(item.category_id) === Number(selectedCategory.value))
     }
     return data
   })
@@ -44,19 +59,18 @@
   }
 
   const handleEdit = (row) => {
-    router.push({ name: 'productedit', params: { id: row.id } })
+    router.push({ name: 'productedit', params: { id: row.product_id } })
   }
 </script>
 
 <template>
   <div class="page-container">
-    <div v-if="productStore.isLoading" class="loading-state">
+    <div v-if="productStore.isLoading || categoryStore.isLoading" class="loading-state">
       <h2>⏳ 正在載入資料...</h2>
     </div>
-    <div v-else-if="productStore.error" class="error-state">
-      <h2>❌ 讀取資料失敗：{{ productStore.error }}</h2>
+    <div v-else-if="productStore.error || categoryStore.error" class="error-state">
+      <h2>❌ 讀取資料失敗：{{ productStore.error || categoryStore.error }}</h2>
     </div>
-
     <Tablelist
       v-else
       title="商品管理"
@@ -75,13 +89,12 @@
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
           <el-table-column prop="sku" label="商品編號" width="180" />
-
           <el-table-column label="商品圖片" width="150" align="center">
             <template #default="scope">
               <div class="image-container">
                 <el-image
-                  v-if="scope.row.mainImageUrl"
-                  :src="scope.row.mainImageUrl"
+                  v-if="scope.row.main_image_url"
+                  :src="`http://localhost:8888/guard-sea_api${scope.row.main_image_url}`"
                   fit="cover"
                   style="width: 100%; height: 100%"
                 />
@@ -89,23 +102,26 @@
               </div>
             </template>
           </el-table-column>
-
           <el-table-column prop="name" label="商品名稱" min-width="250" />
-
-          <el-table-column prop="category" label="商品分類" width="150" align="center" />
-
-          <el-table-column prop="status" label="商品狀態" width="150" align="center">
+          <el-table-column label="商品分類" width="150" align="center">
             <template #default="scope">
-              <el-tag :type="scope.row.status === '上架' ? 'success' : 'info'">
-                {{ scope.row.status }}
+              {{
+                categoryStore.categories.find(
+                  (c) => Number(c.category_id) === scope.row.category_id
+                )?.category_name || '未知'
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="商品狀態" width="150" align="center">
+            <template #default="scope">
+              <el-tag :type="Number(scope.row.status) === 1 ? 'success' : 'info'">
+                {{ Number(scope.row.status) === 1 ? '上架' : '下架' }}
               </el-tag>
             </template>
           </el-table-column>
-
           <el-table-column prop="price" label="商品價格" width="150" align="center">
-            <template #default="scope">${{ scope.row.price.toLocaleString() }}</template>
+            <template #default="scope">${{ scope.row.price?.toLocaleString() }}</template>
           </el-table-column>
-
           <el-table-column label="編輯" width="100" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="handleEdit(scope.row)">
@@ -118,7 +134,6 @@
     </Tablelist>
   </div>
 </template>
-
 <style lang="scss" scoped>
   .page-container {
     width: 100%;

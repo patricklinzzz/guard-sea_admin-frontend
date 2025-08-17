@@ -145,32 +145,22 @@ const router = createRouter({
   },
 })
 
-/**
- * 全域導航守衛
- *
- * 每次路由切換前都會觸發。
- * 用於檢查使用者的身份驗證狀態，並控制頁面存取權限。
- */
-router.beforeEach((to, from, next) => {
-  // 注意：在 Pinia 設置完成前 (app.use(pinia))，不能在模組頂層呼叫 useAuthStore()
-  // 因此我們在守衛內部獲取 auth store
-  const authStore = useAuthStore()
-  const isAuthenticated = authStore.isAuthenticated
+//全域導航守衛每次路由切換前都會觸發。用於檢查使用者的身份驗證狀態，並控制頁面存取權限
 
-  // 情況 1: 路由需要驗證 (requiresAuth: true)，但使用者未登入
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // 將使用者導向到登入頁面
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+
+  if (!authStore.isAuthenticated) {
+    await authStore.checkAuthStatus()
+  }
+  //路由需要驗證 (requiresAuth: true)，但使用者未登入
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login' })
   }
-  // 情況 2: 使用者已登入，但試圖訪問僅限訪客的頁面 (guest: true)，例如登入頁
-  else if (to.meta.guest && isAuthenticated) {
-    // 將使用者導向到首頁
+  // 使用者已登入，但試圖訪問僅限訪客的頁面 (guest: true)，例如登入頁
+  else if (to.meta.guest && authStore.isAuthenticated) {
     next({ name: 'home' })
-  }
-  // 情況 3: 其他所有情況都允許訪問
-  // (例如：已登入訪問需驗證頁，或未登入訪問公開頁)
-  else {
-    // 允許訪問
+  } else {
     next()
   }
 })

@@ -2,13 +2,16 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import axios from 'axios'
 
+const baseUrl = import.meta.env.VITE_API_BASE
+
 export const useAdminStore = defineStore('admin', () => {
   const admins = ref([])
   //獲取管理員資料
   const fetchAdmins = async () => {
     try {
-      const res = await axios.get('http://localhost:8888/api/admins/get_admins.php')
-      admins.value = res.data
+      const apiUrl = `${baseUrl}/admins/get_admins.php`
+      const response = await axios.get(apiUrl)
+      admins.value = response.data
       console.log('Admin data fetched successfully:', admins.value)
     } catch (error) {
       console.log(error)
@@ -17,10 +20,11 @@ export const useAdminStore = defineStore('admin', () => {
   //新增管理員
   const addAdmin = async (adminData) => {
     try {
-      const response = await axios.post('http://localhost:8888/api/admins/add_admin.php',adminData)
+      const apiUrl = `${baseUrl}/admins/add_admin.php`
+      const response = await axios.post(apiUrl, adminData)
       if (response.data.success) {
         console.log('管理員新增成功:', response.data.message)
-        await fetchAdmins() 
+        await fetchAdmins()
       } else {
         throw new Error(response.data.error || response.data.message || '後端新增失敗')
       }
@@ -28,25 +32,29 @@ export const useAdminStore = defineStore('admin', () => {
       console.error(error)
     }
   }
-
+  //編輯管理員取得id
   const getAdminById = (id) => {
-    return admins.value.find((admin) => admin.id === id)
+    return admins.value.find((admin) => admin.administrator_id === id)
   }
-
-  const updateAdmin = (updatedAdminData) => {
-    const index = admins.value.findIndex((admin) => admin.id === updatedAdminData.id)
-    if (index !== -1) {
-      admins.value[index] = updatedAdminData
+  //編輯管理員
+  const updateAdmin = async (updateAdminData) => {
+    try {
+      const apiUrl = `${baseUrl}/admins/update_admin.php`
+      const response = await axios.patch(apiUrl, updateAdminData)
+      if (response.data.success) {
+        await fetchAdmins()
+      } else {
+        console.error(response.data.error)
+      }
+    } catch (error) {
+      console.error(error)
     }
   }
-
   //管理員狀態
   const updateAdminStatus = async (adminId, newStatus) => {
     try {
-      const response = await axios.post(
-        'http://localhost:8888/api/admins/update_admin_status.php',
-        { id: adminId, status: newStatus }
-      )
+      const apiUrl = `${baseUrl}/admins/update_admin_status.php`
+      const response = await axios.patch(apiUrl, { id: adminId, status: newStatus })
       if (response.data.success) {
         await fetchAdmins()
       } else {

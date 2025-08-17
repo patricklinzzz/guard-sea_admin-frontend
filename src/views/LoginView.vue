@@ -17,9 +17,7 @@
     if (!value) {
       return callback(new Error('請輸入密碼'))
     }
-    // 驗證規則：長度至少8，包含數字，包含特殊符號
     if (value.length < 8 || !/\d/.test(value) || !/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-      // 錯誤訊息由下方的提示文字提供，這裡返回一個通用錯誤即可
       return callback(new Error('密碼格式不符'))
     }
     callback()
@@ -64,7 +62,7 @@
         :hide-required-asterisk="true"
         @keyup.enter="handleLogin"
       >
-        <el-form-item prop="username" label="電子信箱">
+        <el-form-item prop="username" label="管理員帳號">
           <el-input v-model="loginForm.username" :prefix-icon="User" size="large" />
         </el-form-item>
         <el-form-item prop="password" label="密碼">

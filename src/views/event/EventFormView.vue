@@ -3,6 +3,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useEventStore } from '@/stores/event_store'
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +22,7 @@ const form = reactive({
   regDeadline: '',
   location: '',
   address: '',
-  coverImage: '',
+  coverImage: '', // 用於預覽的 data URL
   intro: '',
   content: '',
   regInfo: '',
@@ -30,7 +31,21 @@ const form = reactive({
   quota: '',
 })
 
-const dateRange = ref(['2025-08-05 12:00', '2025-08-06 12:00'])
+// 新增一個 ref 來存放圖片檔案的原始物件
+const coverImageFile = ref(null)
+
+const getCategoryId = (categoryName) => {
+  switch (categoryName) {
+    case '實體行動':
+      return 1
+    case '教育推廣':
+      return 2
+    case '線上參與':
+      return 3
+    default:
+      return null
+  }
+}
 
 onMounted(async () => {
   if (eventStore.eventData.length === 0) {
@@ -41,7 +56,19 @@ onMounted(async () => {
     const id = Number(route.params.id)
     const item = eventStore.eventData.find((i) => i.id === id)
     if (item) {
-      Object.assign(form, item)
+      // 編輯模式下的資料轉換（從後端格式轉為前端表單格式）
+      form.title = item.title
+      form.eventDate = item.eventDate
+      form.regDeadline = item.deadline.split(' ')[0] // 移除時間部分
+      form.location = item.location // 這裡假設 location 和 address 是分開的，可能需要進一步處理
+      form.address = item.location
+      form.coverImage = item.image_url
+      form.intro = item.preface
+      form.content = item.description
+      form.regInfo = item.presenter
+      form.note = item.notes
+      form.category = item.category
+      form.quota = item.quota
     } else {
       loadError.value = true
     }
@@ -49,12 +76,14 @@ onMounted(async () => {
   isReady.value = true
 })
 
+// 修改這個函數，除了預覽之外，還要儲存原始檔案
 const handleImageChange = (file) => {
   const reader = new FileReader()
   reader.onload = () => {
     form.coverImage = reader.result
   }
   reader.readAsDataURL(file.raw)
+  coverImageFile.value = file.raw // 將原始檔案儲存在 coverImageFile ref 中
 }
 
 const handleSubmit = async () => {
@@ -63,25 +92,48 @@ const handleSubmit = async () => {
 
   try {
     if (isEditMode.value) {
-      const id = Number(route.params.id)
-      const index = eventStore.eventData.findIndex((i) => i.id === id)
-      if (index !== -1) {
-        // 更新原本的活動資料
-        eventStore.eventData[index] = { ...form, id }
-      } else {
-        loadError.value = true
-        return
-      }
-    } else {
-      // 新增活動，假設用時間戳當 ID
-      const newId = Date.now()
-      eventStore.eventData.push({ ...form, id: newId })
+      // TODO: 實作編輯功能
+      ElMessage.info('編輯功能尚未實作。')
+      return
     }
 
-    router.push({ name: 'eventlist' })
+    // 1. 建立一個 FormData 物件
+    const formData = new FormData()
+
+    // 2. 將所有表單資料追加到 FormData 物件中
+    // 欄位名稱 (Key) 必須與後端 PHP 腳本預期的名稱一致！
+    formData.append('title', form.title)
+    formData.append('preface', form.intro)
+    formData.append('description', form.content)
+    formData.append('presenter', form.regInfo)
+    formData.append('start_date', form.eventDate[0] ? form.eventDate[0] + ':00' : '')
+    formData.append('end_date', form.eventDate[1] ? form.eventDate[1] + ':00' : '')
+    formData.append('location', form.location + ' ' + form.address)
+    formData.append('quota', parseInt(form.quota))
+    formData.append('registration_close_date', form.regDeadline + ' 23:59:59')
+    formData.append('status', '報名中')
+    formData.append('notes', form.note)
+    formData.append('category_id', getCategoryId(form.category))
+
+    // 3. 將圖片檔案追加到 FormData 物件中
+    // 後端腳本預期檔案的 Key 是 'image_file'
+    if (coverImageFile.value) {
+      formData.append('image_file', coverImageFile.value)
+    }
+
+    // 4. 呼叫後端 API，傳送 FormData 物件
+    // 這裡我們直接使用 axios 作為範例
+    const response = await axios.post('http://localhost:8888/guard-sea_api/events/add_event.php', formData)
+
+    if (response.data.status === 'success') {
+      ElMessage.success('活動新增成功！')
+      router.push({ name: 'eventlist' })
+    } else {
+      ElMessage.error(`提交失敗：${response.data.message}`)
+    }
   } catch (err) {
     console.error('提交資料錯誤:', err)
-    ElMessage.error('提交失敗，請稍後再試。')
+    ElMessage.error('提交失敗，請檢查網路連線或稍後再試。')
   } finally {
     isSubmitting.value = false
   }

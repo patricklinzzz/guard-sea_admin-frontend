@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
 const baseUrl = import.meta.env.VITE_API_BASE
@@ -12,7 +13,7 @@ export const useAdminStore = defineStore('admin', () => {
       const apiUrl = `${baseUrl}/admins/get_admins.php`
       const response = await axios.get(apiUrl)
       admins.value = response.data
-      console.log('Admin data fetched successfully:', admins.value)
+      // console.log('Admin data fetched successfully:', admins.value)
     } catch (error) {
       console.log(error)
     }
@@ -26,7 +27,7 @@ export const useAdminStore = defineStore('admin', () => {
         console.log('管理員新增成功:', response.data.message)
         await fetchAdmins()
       } else {
-        throw new Error(response.data.error || response.data.message || '後端新增失敗')
+        ElMessage.error(response.data.error || response.data.message || '新增失敗，請檢查資料。')
       }
     } catch (error) {
       console.error(error)
@@ -58,10 +59,10 @@ export const useAdminStore = defineStore('admin', () => {
       if (response.data.success) {
         await fetchAdmins()
       } else {
-        console.error(response.data.error)
+        ElMessage.error(response.data.error || '管理員狀態更新失敗。')
       }
     } catch (error) {
-      console.error(error)
+      ElMessage.error(error.response?.data?.error || error.response?.data?.message || '發生未知錯誤，請重試。');
     }
   }
 

@@ -69,7 +69,7 @@
 
     if (
       originalCoupon.title === tempCoupon.value.title &&
-      originalCoupon.validDays === tempCoupon.value.validDays &&
+      originalCoupon.valid_days === tempCoupon.value.valid_days &&
       originalCoupon.value === tempCoupon.value.value
     ) {
       ElMessage.info('優惠券內容沒有變動。')
@@ -79,7 +79,7 @@
 
     const updatedFields = {
       title: tempCoupon.value.title,
-      validDays: tempCoupon.value.validDays,
+      valid_days: tempCoupon.value.valid_days,
       value: tempCoupon.value.value,
     }
 
@@ -116,11 +116,11 @@
           <template #default="{ row }">
             <el-input
               v-if="editingCouponId === row.id"
-              v-model.number="tempCoupon.validDays"
+              v-model.number="tempCoupon.valid_days"
               size="small"
               type="number"
             />
-            <span v-else>{{ row.validDays ? `${row.validDays}天` : '沒有期限限制' }}</span>
+            <span v-else>{{ row.valid_days ? `${row.valid_days}天` : '沒有期限限制' }}</span>
           </template>
         </el-table-column>
 
@@ -138,7 +138,7 @@
 
         <el-table-column label="優惠代碼前綴" width="200" align="center">
           <template #default="{ row }">
-            <span>{{ row.code }}</span>
+            <span>{{ row.coupon_code_prefix }}</span>
           </template>
         </el-table-column>
 

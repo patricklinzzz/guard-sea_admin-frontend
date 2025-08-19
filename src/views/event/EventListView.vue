@@ -2,20 +2,27 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Edit } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import axios from 'axios'
 import Tablelist from '@/components/tablelist.vue'
 import { useEventStore } from '@/stores/event_store'
 
 const eventStore = useEventStore()
 const router = useRouter()
 
-onMounted(() => {
-  eventStore.fetchEventData()
-})
+// 這裡填入你的後端 API 路徑
+const backendUpdateUrl = 'http://localhost:8888/guard-sea_api/events/update_event_status.php';
 
+// 頁面狀態
 const currentPage = ref(1)
 const selectedCategory = ref('all')
 const searchText = ref('')
 const searchKey = ref('title')
+
+// 獲取並處理活動資料
+onMounted(async () => {
+  await eventStore.fetchEventData()
+})
 
 const categoryOptions = computed(() => {
   const counts = {}
@@ -28,7 +35,6 @@ const categoryOptions = computed(() => {
 
 const filteredData = computed(() => {
   let data = [...eventStore.eventData]
-
   data.sort((a, b) => new Date(b.eventDate[0]) - new Date(a.eventDate[0]))
 
   if (selectedCategory.value !== 'all') {
@@ -49,6 +55,7 @@ watch([selectedCategory, searchText], () => {
   currentPage.value = 1
 })
 
+// 路由跳轉處理
 const handleAddEvent = () => {
   router.push({ name: 'eventAdd' })
 }
@@ -61,9 +68,9 @@ const handleeventMember = (row) => {
   router.push({ name: 'eventMember', params: { id: row.id } })
 }
 
+// 格式化日期
 const formatDateRange = (dateRange) => {
   if (!Array.isArray(dateRange) || dateRange.length < 2) return '日期格式錯誤'
-
   const startDate = new Date(dateRange[0])
   const endDate = new Date(dateRange[1])
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '日期格式錯誤'
@@ -71,15 +78,38 @@ const formatDateRange = (dateRange) => {
   const y = startDate.getFullYear()
   const m = String(startDate.getMonth() + 1).padStart(2, '0')
   const d = String(startDate.getDate()).padStart(2, '0')
-
   const startHH = String(startDate.getHours()).padStart(2, '0')
   const startMM = String(startDate.getMinutes()).padStart(2, '0')
-
   const endHH = String(endDate.getHours()).padStart(2, '0')
   const endMM = String(endDate.getMinutes()).padStart(2, '0')
 
   return `${y}.${m}.${d} ${startHH}:${startMM}-${endHH}:${endMM}`
 }
+
+// 處理狀態變更的核心函式
+const handleStatusChange = async (eventId, newStatus) => {
+    try {
+        const response = await axios.post(backendUpdateUrl, {
+            id: eventId,
+            status: newStatus,
+        });
+
+        if (response.data.status === 'success') {
+            ElMessage.success('活動狀態更新成功！');
+        } else {
+            ElMessage.error(`更新失敗: ${response.data.message}`);
+        }
+    } catch (err) {
+        console.error('更新活動狀態錯誤:', err);
+        ElMessage.error('更新失敗，請檢查網路或稍後再試。');
+        
+        // 如果 API 呼叫失敗，重新載入整個列表以還原狀態
+        await eventStore.fetchEventData();
+    }
+};
+
+// 移除 watch 函式，因為我們現在使用 @change 事件
+
 </script>
 
 <template>
@@ -127,7 +157,12 @@ const formatDateRange = (dateRange) => {
           </el-table-column>
           <el-table-column label="狀態" min-width="120" align="center">
             <template #default="scope">
-              <el-select v-model="scope.row.status" size="small" style="min-width: 100px">
+              <el-select 
+                v-model="scope.row.status" 
+                size="small" 
+                style="min-width: 100px"
+                @change="handleStatusChange(scope.row.id, scope.row.status)"
+              >
                 <el-option label="報名中" value="open" />
                 <el-option label="報名截止" value="closed" />
                 <el-option label="已結束" value="finished" />
@@ -160,4 +195,3 @@ const formatDateRange = (dateRange) => {
   transform: scale(1.5);
 }
 </style>
-Z

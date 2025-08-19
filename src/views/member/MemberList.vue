@@ -14,19 +14,24 @@
       >
         <template #default="{ data }">
           <el-table :data="data" style="width: 100%" class="member_list_table">
-            <el-table-column prop="id" label="會員編號" min-width="170" align="center" />
-            <el-table-column prop="name" label="會員姓名" min-width="170" align="center" />
+            <el-table-column prop="username" label="會員帳號" min-width="170" align="center" />
+            <el-table-column prop="fullname" label="會員姓名" min-width="170" align="center" />
             <el-table-column prop="email" label="Email" min-width="200" />
-            <el-table-column prop="phone" label="電話" min-width="180" align="center" />
+            <el-table-column prop="phone_number" label="電話" min-width="180" align="center">
+              <template #default="scope">
+                {{ scope.row.phone_number || '無' }}
+              </template>
+            </el-table-column>
             <el-table-column label="會員狀態" min-width="180" align="center">
               <template #default="scope">
                 <el-select
                   :model-value="scope.row.status"
                   placeholder="選擇狀態"
                   style="width: 110px"
+                  @change="handleStatusChange(scope.row.member_id, $event)"
                 >
-                  <el-option label="啟用中" value="active"></el-option>
-                  <el-option label="已停權" value="suspended"></el-option>
+                  <el-option label="啟用中" value="1"></el-option>
+                  <el-option label="已停權" value="0"></el-option>
                 </el-select>
               </template>
             </el-table-column>
@@ -42,16 +47,16 @@
   </div>
 
   <el-dialog v-model="dialogVisible" title="會員優惠券查詢" width="700px" class="coupon_dialog">
-    <p class="dialog_member_name">姓名：{{ selectedMember?.name }}</p>
+    <p class="dialog_member_name">姓名：{{ selectedMember?.fullname }}</p>
     <el-table
       :data="selectedMemberCoupons"
       v-if="selectedMemberCoupons.length > 0"
       class="coupon_dialog_table"
       max-height="40vh"
     >
-      <el-table-column property="name" label="優惠券名稱" align="center" />
-      <el-table-column property="status" label="狀態" align="center" />
-      <el-table-column property="expiry_date" label="使用期限" align="center" />
+      <el-table-column property="title" label="優惠券名稱" align="center" />
+      <el-table-column property="value" label="折扣金額" align="center" />
+      <el-table-column property="expiration_date" label="使用期限" align="center" />
     </el-table>
 
     <p v-else>該會員目前沒有優惠券。</p>
@@ -64,8 +69,9 @@
   </el-dialog>
 </template>
 <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import TableList from '@/components/tablelist.vue'
+  import axios from 'axios'
 
   const currentPage = ref(1)
   const searchTerm = ref('')
@@ -73,72 +79,27 @@
   const selectedMember = ref(null)
   const selectedMemberCoupons = ref([])
 
-  const allMembers = ref([
-    {
-      id: '848900988',
-      name: '王大陸',
-      email: 'jay3234222@gmail.com',
-      phone: '08839324311',
-      status: 'active',
-    },
-    {
-      id: '548330988',
-      name: '陳零九',
-      email: 'jay3234222@gmail.com',
-      phone: '08839324311',
-      status: 'active',
-    },
-    {
-      id: '548330988',
-      name: '陳大天',
-      email: 'jay3234222@gmail.com',
-      phone: '08839324311',
-      status: 'active',
-    },
-    {
-      id: '548330988',
-      name: '大根',
-      email: 'jay3234222@gmail.com',
-      phone: '08839324311',
-      status: 'active',
-    },
-    {
-      id: '123456789',
-      name: '林心如',
-      email: 'ruby@example.com',
-      phone: '0912345678',
-      status: 'suspended',
-    },
-    {
-      id: '987654321',
-      name: '霍建華',
-      email: 'wallace@example.com',
-      phone: '0987654321',
-      status: 'active',
-    },
-  ])
+  const allMembers = ref([])
 
-  const memberCouponsData = {
-    848900988: [
-      { name: '聰明回饋券', status: '可使用', expiry_date: '2025/08/08' },
-      { name: '聰明回饋券', status: '已使用', expiry_date: '2024/07/05' },
-      { name: '聰明回饋券', status: '已過期', expiry_date: '2025/06/20' },
-      { name: '新人見面禮', status: '可使用', expiry_date: '2025/12/31' },
-      { name: '生日祝福券', status: '可使用', expiry_date: '2025/10/10' },
-      { name: '夏季特賣券', status: '已過期', expiry_date: '2023/08/31' },
-      { name: '清倉折扣券', status: '可使用', expiry_date: '2025/09/15' },
-      { name: '雙十一購物金', status: '可使用', expiry_date: '2025/11/11' },
-      { name: '聖誕狂歡券', status: '已使用', expiry_date: '2024/12/25' },
-      { name: '年度VIP回饋', status: '可使用', expiry_date: '2025/12/31' },
-    ],
-    548330988: [],
-    123456789: [{ name: '停權安慰券', status: '已過期', expiry_date: '2023/01/01' }],
+  const baseUrl = import.meta.env.VITE_API_BASE
+
+  onMounted(async () => {
+    await fetchMembers()
+  })
+
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/members/get_members.php`)
+      allMembers.value = response.data
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const filteredMembers = computed(() => {
     if (!searchTerm.value) return allMembers.value
     return allMembers.value.filter((m) =>
-      m.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+      m.fullname.toLowerCase().includes(searchTerm.value.toLowerCase())
     )
   })
 
@@ -146,9 +107,37 @@
     currentPage.value = 1
   }
 
-  const handleViewCoupons = (member) => {
+  const handleStatusChange = async (memberId, newStatus) => {
+    try {
+      const response = await axios.patch(`${baseUrl}/members/update_member_status.php`, {
+        id: memberId,
+        status: newStatus,
+      })
+      if (!response.data.success) {
+        ElMessage.error(response.data.error || '管理員狀態更新失敗。')
+      }
+      await fetchMembers()
+    } catch (error) {
+      ElMessage.error(
+        error.response?.data?.error || error.response?.data?.message || '發生未知錯誤，請重試。'
+      )
+    }
+  }
+
+  const handleViewCoupons =async (member) => {
     selectedMember.value = member
-    selectedMemberCoupons.value = memberCouponsData[member.id] || []
+    try {
+      const response = await axios.post(`${baseUrl}/members/get_member_coupons.php`,member)
+      if(response.data.success){
+        selectedMemberCoupons.value = response.data.data
+      }else {
+      selectedMemberCoupons.value = []
+      }
+    }catch(error){
+      console.error(error);
+      selectedMemberCoupons.value = []
+    }
+    console.log(selectedMemberCoupons.value);
     dialogVisible.value = true
   }
 </script>

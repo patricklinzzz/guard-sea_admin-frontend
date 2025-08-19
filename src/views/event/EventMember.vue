@@ -1,68 +1,34 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useRegistrationStore } from '@/stores/registration_store'
 import TableList from '@/components/tablelist.vue'
 
 const currentPage = ref(1)
 const searchTerm = ref('')
+const route = useRoute()
 
-const activityList = ref([
-    {
-        id: 1,
-        name: '王大陸',
-        email: 'jay3234222@gmail.com',
-        phone: '08839324311',
-        contact_person: '王媽媽',
-        contact_phone: '0912345678',
-        notes: '無',
-    },
-    {
-        id: 2,
-        name: '陳零九',
-        email: 'jay3234222@gmail.com',
-        phone: '08839324311',
-        contact_person: '陳爸爸',
-        contact_phone: '0987654321',
-        notes: '不希望出現在公開攝影紀錄中，請協助避拍',
-    },
-    {
-        id: 3,
-        name: '陳大天',
-        email: 'jay3234222@gmail.com',
-        phone: '08839324311',
-        contact_person: '',
-        contact_phone: '',
-        notes: '無',
-    },
-    {
-        id: 4,
-        name: '大根',
-        email: 'jay3234222@gmail.com',
-        phone: '08839324311',
-        contact_person: '大根姊姊',
-        contact_phone: '0955555555',
-        notes: '聽力障礙者參加，會自行攜帶輔具工具',
-    },
-    {
-        id: 5,
-        name: '大根',
-        email: 'jay3234222@gmail.com',
-        phone: '08839324311',
-        contact_person: '大根姊姊',
-        contact_phone: '0955555555',
-        notes: '無',
-    },
-    ])
+// 報名名單 store
+const registrationStore = useRegistrationStore()
 
-    // 根據 searchTerm 過濾活動名單
-    const filteredActivities = computed(() => {
-    if (!searchTerm.value) return activityList.value
-    return activityList.value.filter((a) =>
+// 頁面載入時抓取名單
+onMounted(() => {
+    const eventId = route.params.id // 假設網址是 /admin/event/:id/registrations
+    if (eventId) {
+        registrationStore.fetchRegistrationByEvent(eventId)
+    }
+})
+
+// 根據 searchTerm 過濾報名名單
+const filteredRegistrations = computed(() => {
+    if (!searchTerm.value) return registrationStore.registrationList
+    return registrationStore.registrationList.filter((a) =>
         a.name.toLowerCase().includes(searchTerm.value.toLowerCase())
     )
-    })
+})
 
-    // 執行搜尋時，重設頁面為第一頁
-    const performSearch = () => {
+// 執行搜尋時，重設頁面為第一頁
+const performSearch = () => {
     currentPage.value = 1
     }
 </script>
@@ -72,8 +38,8 @@ const activityList = ref([
         <form @submit.prevent="performSearch">
         <TableList
             title="活動名單"
-            :table-data="filteredActivities"
-            :total="filteredActivities.length"
+            :table-data="filteredRegistrations"
+            :total="filteredRegistrations.length"
             v-model:current-page="currentPage"
             v-model:search-term="searchTerm"
             :show-search="true"
@@ -96,9 +62,8 @@ const activityList = ref([
     </div>
 </template>
 
-
 <style lang="scss" scoped>
-    .activity_list_container {
+.activity_list_container {
     width: 100%;
     box-sizing: border-box;
 }

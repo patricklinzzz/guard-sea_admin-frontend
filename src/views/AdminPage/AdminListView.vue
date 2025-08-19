@@ -5,7 +5,7 @@
     :showAddButton="true"
     :showSearch="true"
     addButtonText="+ 新增管理員"
-    searchPlaceholder="請輸入員工姓名"
+    searchPlaceholder="請輸入管理員帳號"
     :search-key="searchKey"
     v-model:searchTerm="searchText"
     :total="filteredData.length"
@@ -15,9 +15,9 @@
   >
     <template #default="{ data }">
       <el-table :data="data" style="width: 100%">
-        <el-table-column prop="administrator_id" label="員工編號" min-width="120" />
-        <el-table-column prop="username" label="管理員帳號" min-width="160" />
-        <el-table-column prop="email" label="Email" min-width="280" />
+        <el-table-column prop="administrator_id" label="管理員編號" min-width="130" />
+        <el-table-column prop="username" label="管理員帳號" min-width="130" />
+        <el-table-column prop="email" label="Email" min-width="160" />
         <el-table-column prop="fullname" label="管理員姓名" min-width="160" />
         <el-table-column label="管理員狀態" min-width="180" align="center">
           <template #default="scope">
@@ -52,7 +52,7 @@
 
   const currentPage = ref(1)
   const searchText = ref('')
-  const searchKey = ref('name')
+  const searchKey = ref('username')
 
   const filteredData = computed(() => {
     let data = [...admin.admins]

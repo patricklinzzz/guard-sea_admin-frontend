@@ -1,12 +1,20 @@
 <template>
-  <h2 style="font-size: 24px;">編輯管理員</h2>
-  <el-form v-if="form" :model="form" label-width="auto" style="max-width: 600px" labelPosition="top">
-    <el-form-item label="員工編號">
-      <el-input v-model="form.id" disabled />
+  <h2 style="font-size: 24px">編輯管理員</h2>
+  <el-form
+    v-if="form"
+    :model="form"
+    label-width="auto"
+    style="max-width: 600px"
+    labelPosition="top"
+  >
+    <el-form-item label="管理員編號">
+      <el-input v-model="form.administrator_id" disabled />
     </el-form-item>
-    <el-form-item label="姓名">
-      <el-input v-model="form.name" />
+
+    <el-form-item label="管理員帳號">
+      <el-input v-model="form.username" />
     </el-form-item>
+
     <el-form-item
       prop="email"
       label="Email"
@@ -17,9 +25,11 @@
     >
       <el-input v-model="form.email" />
     </el-form-item>
-    <el-form-item label="電話">
-      <el-input v-model="form.phone" />
+
+    <el-form-item label="姓名">
+      <el-input v-model="form.fullname" />
     </el-form-item>
+
     <el-form-item>
       <el-button @click="handleCancel">取消</el-button>
       <el-button type="primary" @click="handleSubmit">更新</el-button>

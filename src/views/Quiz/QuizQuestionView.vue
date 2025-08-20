@@ -16,11 +16,7 @@
   const loading = ref(true)
 
   const categoryOptions = computed(() => {
-    const counts = {}
-    quizStore.quizzes.forEach((item) => {
-      if (!item.quiz_id) return
-      counts[item.quiz_id] = (counts[item.quiz_id] || 0) + 1
-    })
+    const counts = quizStore.counts
     return Object.entries(counts).map(([key, count]) => ({
       label: quizStore.quiz_map[key],
       value: key,
@@ -29,7 +25,6 @@
   })
 
   const filteredData = computed(() => {
-    console.log(quizStore.quizzes.length)
     let data = [...quizStore.quizzes]
     if (selectedCategory.value !== 'all') {
       data = data.filter((item) => item.quiz_id == selectedCategory.value)
@@ -56,25 +51,40 @@
         cancelButtonText: '取消',
         type: 'warning',
       })
+      const res = await quizStore.deleteQuestionToQuiz(row)
+      console.log(res)
+      switch (res) {
+        case 0:
+          ElMessage({
+            type: 'error',
+            message: '題庫庫量不足，刪除失敗!',
+          })
+          break
+        case 1:
+          ElMessage({
+            type: 'success',
+            message: '刪除成功！',
+          })
+          break
+        case -1:
+          ElMessage({
+            type: 'error',
+            message: 'API刪除失敗!',
+          })
+          break
+      }
 
-      // 這是模擬刪除，之後這裡可以改成 await axios.delete(`/api/news/${row.id}`)
-
-      // 模擬延遲
-      setTimeout(() => {
-        fakeDelete(row.question_id)
-        ElMessage({
-          type: 'success',
-          message: '刪除成功！',
-        })
-      }, 500) // 延遲刪除
+      // // 模擬延遲
+      // setTimeout(() => {
+      //   fakeDelete(row)
+      // }, 500) // 延遲刪除
     } catch (err) {
-      // 使用者點了「取消」就什麼都不做
       console.log('取消刪除', err)
     }
   }
 
-  const fakeDelete = (id) => {
-    quizStore.deleteQuestionToQuiz(id)
+  const fakeDelete = (row) => {
+    quizStore.deleteQuestionToQuiz(row)
     // quizStore.quizzes.filter((item) => item.question_id != id)
   }
 

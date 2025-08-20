@@ -35,6 +35,15 @@ export const useQuizStore = defineStore('quiz', () => {
     }
   }
 
+  const counts = computed(() => {
+    const tmp = {}
+    quizzes.value.forEach((item) => {
+      if (!item.quiz_id) return
+      tmp[item.quiz_id] = (tmp[item.quiz_id] || 0) + 1
+    })
+    return tmp
+  })
+
   // 2. Actions: Actions are regular functions that modify the state.
   const addQuestionToQuiz = async (newQuestion) => {
     const quiz = quizzes.value
@@ -52,8 +61,17 @@ export const useQuizStore = defineStore('quiz', () => {
     }
   }
 
-  const deleteQuestionToQuiz = async (q_id) => {
+  const deleteQuestionToQuiz = async (row) => {
     const quiz = quizzes.value
+    const num_here = counts.value[+row.quiz_id]
+    const num_from_quiz = +quiz_title.value[+row.quiz_id - 1].question_num
+    console.log(`num here: ${num_here}`)
+    console.log(`num from quiz: ${num_from_quiz}`)
+    if (num_here - 1 < num_from_quiz) {
+      return 0
+    }
+
+    const q_id = row.question_id
     if (quiz) {
       try {
         const apiUrl = `${baseUrl}/questions/delete_questions.php?question_id=${q_id}`
@@ -62,8 +80,10 @@ export const useQuizStore = defineStore('quiz', () => {
 
         const question_index = quiz.findIndex((q) => q.question_id == q_id)
         if (question_index != -1) quiz.splice(question_index, 1)
+        return 1
       } catch (err) {
         console.error('delete Error:', err)
+        return -1
       }
     }
   }
@@ -88,6 +108,7 @@ export const useQuizStore = defineStore('quiz', () => {
     fetchError,
     isInitialized,
     quiz_map,
+    counts,
     addQuestionToQuiz,
     deleteQuestionToQuiz,
     editQuestion,

@@ -1,57 +1,75 @@
+// event_store.js
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-    export const useEventStore = defineStore('event', () => {
-    const eventData = ref([]) // 存活動列表
-    const fetchError = ref(null)
+export const useEventStore = defineStore('event', () => {
+  const eventData = ref([])
+  const categoryData = ref([]) // 新增一個 ref 來儲存分類資料
+  const fetchError = ref(null)
 
-    const fetchEventData = async () => {
-        fetchError.value = null
-        try {
-        const res = await axios.get('http://localhost:8888/guard-sea_api/events/get_event.php')
-        if (res.data.status === 'success') {
-            eventData.value = res.data.data.events.map(item => ({
-                id: item.activity_id,
-                title: item.title,
-                category: item.category_name,
-                deadline: item.registration_close_date,
-                eventDate: [item.start_date, item.end_date],
-                quota: Number(item.quota),
-                status: item.status
-                }))
+  const API_BASE_URL = import.meta.env.VITE_API_BASE
 
-        } else {
-            fetchError.value = res.data.message || '載入活動失敗'
-        }
-        } catch (err) {
-        console.error('活動資料載入失敗', err)
-        fetchError.value = '無法連線到伺服器'
-        }
+  const fetchEventData = async () => {
+    fetchError.value = null
+    try {
+      const res = await axios.get(`${API_BASE_URL}/events/get_event.php`)
+
+      if (res.data.status === 'success') {
+        const { events, categories } = res.data.data // 從 data 物件中解構 events 和 categories
+
+        // 處理活動資料
+        eventData.value = events.map((item) => ({
+          id: item.activity_id,
+          title: item.title,
+          category: item.category_id,
+          registration_close_date: item.registration_close_date,
+          start_date: item.start_date,
+          end_date: item.end_date,
+          location: item.location,
+          preface: item.preface,
+          description: item.description,
+          notes: item.notes,
+          image_url: item.image_url,
+          quota: Number(item.quota),
+          status: item.status,
+          deadline: item.registration_close_date,
+          eventDate: [item.start_date, item.end_date],
+        }))
+
+        // 儲存分類資料
+        categoryData.value = categories.map((item) => ({
+          id: item.category_id,
+          name: item.category_name,
+        }))
+      } else {
+        fetchError.value = res.data.message || '載入活動失敗'
+      }
+    } catch (err) {
+      console.error('活動資料載入失敗', err)
+      fetchError.value = '無法連線到伺服器'
     }
-    
-    // 新增活動函式
-    const addEvent = async (event) => {
-        try {
-            const res = await axios.post('http://localhost:8888/guard-sea_api/events/add_event.php', event)
-            if (res.data.status === 'success') {
-                console.log('活動新增成功', res.data)
-                // 成功後可以重新載入活動列表，讓畫面更新
-                await fetchEventData()
-                return { success: true, message: res.data.message }
-            } else {
-                console.error('新增活動失敗', res.data.message)
-                return { success: false, message: res.data.message }
-            }
-        } catch (err) {
-            console.error('新增活動時發生錯誤', err)
-            return { success: false, message: '無法連線到伺服器或發生網路錯誤' }
-        }
-    }
+  }
 
-    return { eventData, fetchError, fetchEventData, addEvent }
+  const addEvent = async (event) => {
+    try {
+      const res = await axios.post(`${API_BASE_URL}/events/add_event.php`, event)
+      if (res.data.status === 'success') {
+        console.log('活動新增成功', res.data)
+        await fetchEventData()
+        return { success: true, message: res.data.message }
+      } else {
+        console.error('新增活動失敗', res.data.message)
+        return { success: false, message: res.data.message }
+      }
+    } catch (err) {
+      console.error('新增活動時發生錯誤', err)
+      return { success: false, message: '無法連線到伺服器或發生網路錯誤' }
+    }
+  }
+
+  return { eventData, categoryData, fetchError, fetchEventData, addEvent }
 })
-
 
 //             {
 //                 id: 1,
@@ -65,7 +83,7 @@ import { ref } from 'vue'
 //             {
 //                 id: 2,
 //                 title: '教育講座：深度認識海洋',
-//                 category: '教育推廣',
+//                 category: '推廣教育',
 //                 deadline: '2025.11.15',
 //                 eventDate: ['2025-11-20 10:00', '2025-11-20 13:00'],
 //                 quota: 200,
@@ -92,7 +110,7 @@ import { ref } from 'vue'
 //             {
 //                 id: 5,
 //                 title: '深海奇遇：3D',
-//                 category: '教育推廣',
+//                 category: '推廣教育',
 //                 deadline: '2025.10.25',
 //                 eventDate: ['2025-11-01 14:00', '2025-11-01 16:00'],
 //                 quota: 100,
@@ -110,7 +128,7 @@ import { ref } from 'vue'
 //             {
 //                 id: 7,
 //                 title: '餐桌上的海洋：永續漁業探索',
-//                 category: '教育推廣',
+//                 category: '推廣教育',
 //                 deadline: '2025.10.16',
 //                 eventDate: ['2025-10-21 14:00', '2025-10-21 16:00'],
 //                 quota: 80,
@@ -155,7 +173,7 @@ import { ref } from 'vue'
 //             {
 //                 id: 12,
 //                 title: '海洋藝術創作工作坊',
-//                 category: '教育推廣',
+//                 category: '推廣教育',
 //                 deadline: '2025.08.26',
 //                 eventDate: ['2025-09-01 13:00', '2025-09-01 17:00'],
 //                 quota: 30,

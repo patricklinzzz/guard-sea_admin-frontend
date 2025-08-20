@@ -21,7 +21,12 @@
     try {
       const apiUrl = `${baseUrl}/quiz/get_quiz.php`
       const response = await axios.get(apiUrl)
-      allTableData.value = response.data
+      allTableData.value = response.data.map((quiz) => ({
+        ...quiz,
+        quiz_id: Number(quiz.quiz_id),
+        question_num: Number(quiz.question_num),
+        pass_grade: Number(quiz.pass_grade),
+      }))
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
       console.error('Fetch 錯誤：', err)

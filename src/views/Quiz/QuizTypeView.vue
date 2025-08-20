@@ -181,7 +181,7 @@
           </el-table-column>
 
           <!-- 🐋 🐢 🌊 🐳 🦞 🐠 -->
-          <el-table-column prop="question_num" label="題庫數量" width="120" align="center">
+          <el-table-column prop="question_num" label="題目數量" width="120" align="center">
             <template #default="{ row }">
               <span v-if="!editingState.has(row.quiz_id)">{{ row.question_num }}</span>
               <el-input-number

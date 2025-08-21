@@ -16,12 +16,27 @@
   const baseUrl = import.meta.env.VITE_API_BASE
 
   const editingState = ref(new Map())
+  const hasError = ref([])
   const fetchTableData = async () => {
     fetchError.value = null
     try {
-      const apiUrl = `${baseUrl}/quiz/get_quiz.php`
-      const response = await axios.get(apiUrl)
-      allTableData.value = response.data
+      const quiz_api = `${baseUrl}/quiz/get_quiz.php`
+      const num_api = `${baseUrl}/quiz/get_question_num.php`
+      const qr = await axios.get(quiz_api)
+      const nr = await axios.get(num_api)
+      allTableData.value = qr.data.map((quiz) => ({
+        ...quiz,
+        quiz_id: Number(quiz.quiz_id),
+        question_num: Number(quiz.question_num),
+        pass_grade: Number(quiz.pass_grade),
+        num: Number(nr.data[quiz.quiz_id - 1].num),
+      }))
+      hasError.value = nr.data.map((quiz) => ({
+        quiz_description: false,
+        pass_grade: false,
+        num: false,
+      }))
+      console.log(allTableData.value)
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
       console.error('Fetch 錯誤：', err)
@@ -33,8 +48,13 @@
   watch([selectedCategory, searchText], () => {
     currentPage.value = 1
   })
-
+  const resetError = (row_i) => {
+    Object.keys(hasError.value[row_i]).forEach((key) => {
+      hasError.value[row_i][key] = false
+    })
+  }
   const handleEdit = (row) => {
+    console.log(hasError.value)
     editingState.value.set(row.quiz_id, true)
     row.originalData = JSON.parse(JSON.stringify(row))
   }
@@ -43,9 +63,49 @@
       Object.assign(row, row.originalData)
     }
     editingState.value.delete(row.quiz_id)
+    resetError(row.quiz_id - 1)
   }
 
   const handleSubmit = async (row) => {
+    console.log(row)
+    const row_i = row.quiz_id - 1
+    let error = false
+    if (row.quiz_description.trim() === '') {
+      hasError.value[row_i].quiz_description = true
+      ElMessage({
+        message: '題目不可空白!',
+        type: 'error',
+      })
+      error = true
+    } else hasError.value[row_i].quiz_description = false
+
+    if (row.pass_grade < 10 || row.pass_grade > 100) {
+      hasError.value[row_i].pass_grade = true
+      ElMessage({
+        message: '分數標準至少10%，至多100%!',
+        type: 'error',
+      })
+      error = true
+    } else hasError.value[row_i].pass_grade = false
+
+    if (row.question_num < 1 || row.question_num > 20) {
+      hasError.value[row_i].num = true
+      ElMessage({
+        message: '題目至少1題，至多20題!',
+        type: 'error',
+      })
+      error = true
+    } else if (row.question_num > allTableData.value[row_i].num) {
+      hasError.value[row_i].num = true
+      ElMessage({
+        message: `題庫數量不足! 當前題目數量: ${allTableData.value[row_i].num}`,
+        type: 'error',
+      })
+      error = true
+    } else hasError.value[row_i].num = false
+
+    if (error) return
+
     try {
       const apiUrl = `${baseUrl}/quiz/patch_quiz.php`
       const response = await axios.patch(apiUrl, row)
@@ -54,8 +114,6 @@
       console.error('Post Error:', err)
     }
 
-    // Your API call here...
-    // Example of a fake API call
     setTimeout(() => {
       // API call success
       editingState.value.delete(row.quiz_id)
@@ -99,7 +157,12 @@
               >
                 {{ row.quiz_description }}
               </div>
-              <el-input v-else v-model="row.quiz_description" />
+              <div v-else>
+                <el-input
+                  v-model="row.quiz_description"
+                  :class="{ 'is-error': hasError[row.quiz_id - 1].quiz_description }"
+                />
+              </div>
             </template>
           </el-table-column>
           <el-table-column prop="pass_grade" width="120" label="及格標準" align="center">
@@ -108,28 +171,26 @@
               <el-input-number
                 v-else
                 v-model.number="row.pass_grade"
+                :class="{ 'is-error': hasError[row.quiz_id - 1].pass_grade }"
                 type="number"
                 style="width: 50px"
                 :controls="false"
-                :min="0"
-                :max="100"
                 size="small"
               />
             </template>
           </el-table-column>
 
           <!-- 🐋 🐢 🌊 🐳 🦞 🐠 -->
-          <el-table-column prop="question_num" label="題庫數量" width="120" align="center">
+          <el-table-column prop="question_num" label="題目數量" width="120" align="center">
             <template #default="{ row }">
               <span v-if="!editingState.has(row.quiz_id)">{{ row.question_num }}</span>
               <el-input-number
                 v-else
                 v-model.number="row.question_num"
+                :class="{ 'is-error': hasError[row.quiz_id - 1].num }"
                 type="number"
                 style="width: 50px"
                 :controls="false"
-                :min="1"
-                :max="20"
                 size="small"
               />
             </template>
@@ -168,5 +229,12 @@
 
   .el-button.is-link {
     transform: scale(1.7);
+  }
+  :deep(.el-input.is-error .el-input__wrapper) {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+  }
+
+  :deep(.el-input-number.is-error .el-input__wrapper) {
+    box-shadow: 0 0 0 1px var(--el-color-danger) inset;
   }
 </style>

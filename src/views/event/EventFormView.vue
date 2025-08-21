@@ -1,158 +1,19 @@
-<script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { useEventStore } from '@/stores/event_store'
-import axios from 'axios'
-
-const route = useRoute()
-const router = useRouter()
-const eventStore = useEventStore()
-
-const isEditMode = computed(() => !!route.params.id)
-const pageTitle = computed(() => (isEditMode.value ? '編輯活動' : '新增活動'))
-
-const isReady = ref(false)
-const isSubmitting = ref(false)
-const loadError = ref(false)
-
-const form = reactive({
-  title: '',
-  eventDate: [],
-  regDeadline: '',
-  location: '',
-  address: '',
-  coverImage: '', // 用於預覽的 data URL
-  intro: '',
-  content: '',
-  regInfo: '',
-  note: '',
-  category: '',
-  quota: '',
-})
-
-// 新增一個 ref 來存放圖片檔案的原始物件
-const coverImageFile = ref(null)
-
-const getCategoryId = (categoryName) => {
-  switch (categoryName) {
-    case '實體行動':
-      return 1
-    case '教育推廣':
-      return 2
-    case '線上參與':
-      return 3
-    default:
-      return null
-  }
-}
-
-onMounted(async () => {
-  if (eventStore.eventData.length === 0) {
-    await eventStore.fetchEventData()
-  }
-
-  if (isEditMode.value) {
-    const id = Number(route.params.id)
-    const item = eventStore.eventData.find((i) => i.id === id)
-    if (item) {
-      // 編輯模式下的資料轉換（從後端格式轉為前端表單格式）
-      form.title = item.title
-      form.eventDate = item.eventDate
-      form.regDeadline = item.deadline.split(' ')[0] // 移除時間部分
-      form.location = item.location // 這裡假設 location 和 address 是分開的，可能需要進一步處理
-      form.address = item.location
-      form.coverImage = item.image_url
-      form.intro = item.preface
-      form.content = item.description
-      form.regInfo = item.presenter
-      form.note = item.notes
-      form.category = item.category
-      form.quota = item.quota
-    } else {
-      loadError.value = true
-    }
-  }
-  isReady.value = true
-})
-
-// 修改這個函數，除了預覽之外，還要儲存原始檔案
-const handleImageChange = (file) => {
-  const reader = new FileReader()
-  reader.onload = () => {
-    form.coverImage = reader.result
-  }
-  reader.readAsDataURL(file.raw)
-  coverImageFile.value = file.raw // 將原始檔案儲存在 coverImageFile ref 中
-}
-
-const handleSubmit = async () => {
-  if (isSubmitting.value) return
-  isSubmitting.value = true
-
-  try {
-    if (isEditMode.value) {
-      // TODO: 實作編輯功能
-      ElMessage.info('編輯功能尚未實作。')
-      return
-    }
-
-    // 1. 建立一個 FormData 物件
-    const formData = new FormData()
-
-    // 2. 將所有表單資料追加到 FormData 物件中
-    // 欄位名稱 (Key) 必須與後端 PHP 腳本預期的名稱一致！
-    formData.append('title', form.title)
-    formData.append('preface', form.intro)
-    formData.append('description', form.content)
-    formData.append('presenter', form.regInfo)
-    formData.append('start_date', form.eventDate[0] ? form.eventDate[0] + ':00' : '')
-    formData.append('end_date', form.eventDate[1] ? form.eventDate[1] + ':00' : '')
-    formData.append('location', form.location + ' ' + form.address)
-    formData.append('quota', parseInt(form.quota))
-    formData.append('registration_close_date', form.regDeadline + ' 23:59:59')
-    formData.append('status', '報名中')
-    formData.append('notes', form.note)
-    formData.append('category_id', getCategoryId(form.category))
-
-    // 3. 將圖片檔案追加到 FormData 物件中
-    // 後端腳本預期檔案的 Key 是 'image_file'
-    if (coverImageFile.value) {
-      formData.append('image_file', coverImageFile.value)
-    }
-
-    // 4. 呼叫後端 API，傳送 FormData 物件
-    // 這裡我們直接使用 axios 作為範例
-    const response = await axios.post('http://localhost:8888/guard-sea_api/events/add_event.php', formData)
-
-    if (response.data.status === 'success') {
-      ElMessage.success('活動新增成功！')
-      router.push({ name: 'eventlist' })
-    } else {
-      ElMessage.error(`提交失敗：${response.data.message}`)
-    }
-  } catch (err) {
-    console.error('提交資料錯誤:', err)
-    ElMessage.error('提交失敗，請檢查網路連線或稍後再試。')
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-const handleCancel = () => {
-  router.back()
-}
-</script>
-
-
 <template>
   <div class="content-block-wrapper">
     <header class="content-header">
       <h2 class="content_title">{{ pageTitle }}</h2>
     </header>
-    <div v-if="!isReady">載入中...</div>
-    <div v-else-if="loadError">找不到該筆資料，請返回列表頁。</div>
-    <el-form v-else :model="form" label-width="100px" style="max-width: 800px">
+
+    <div v-if="!isReady" class="loading-state">載入中...</div>
+    <div v-else-if="loadError" class="error-state">找不到該筆資料，請返回列表頁。</div>
+
+    <el-form
+      v-else
+      :model="form"
+      label-width="100px"
+      style="max-width: 800px"
+      @submit.prevent="handleSubmit"
+    >
       <el-form-item label="活動名稱">
         <el-input v-model="form.title" />
       </el-form-item>
@@ -163,7 +24,7 @@ const handleCancel = () => {
           type="datetimerange"
           start-placeholder="開始日期時間"
           end-placeholder="結束日期時間"
-          value-format="YYYY-MM-DD HH:mm"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
 
@@ -192,14 +53,16 @@ const handleCancel = () => {
 
       <el-form-item label="活動大圖">
         <el-upload
+          class="upload-demo"
           :show-file-list="false"
+          :auto-upload="false"
           :on-change="handleImageChange"
           accept="image/*"
         >
           <el-button type="primary">上傳檔案</el-button>
         </el-upload>
-        <div v-if="form.coverImage" class="coverimage-preview">
-          <img :src="form.coverImage" alt="封面預覽" class="coverimage-img" />
+        <div v-if="imagePreviewUrl" class="coverimage-preview">
+          <img :src="imagePreviewUrl" alt="封面預覽" class="coverimage-img" />
         </div>
       </el-form-item>
 
@@ -211,20 +74,21 @@ const handleCancel = () => {
         <el-input type="textarea" v-model="form.content" :rows="5" />
       </el-form-item>
 
-      <el-form-item label="報名資訊">
-        <el-input type="textarea" v-model="form.regInfo" :rows="3" style="min-height: 100px; resize: none"/>
-      </el-form-item>
-
       <el-form-item label="備註">
-        <el-input type="textarea" v-model="form.note" :rows="3" style="min-height: 100px; resize: none"/>
+        <el-input
+          type="textarea"
+          v-model="form.note"
+          :rows="3"
+          style="min-height: 100px; resize: none"
+        />
       </el-form-item>
 
       <div class="form-row">
         <el-form-item label="活動分類" class="half">
-          <el-select v-model="form.category" placeholder="選擇分類">
-            <el-option label="實體行動" value="實體行動" />
-            <el-option label="教育推廣" value="教育推廣" />
-            <el-option label="線上參與" value="線上參與" />
+          <el-select v-model="form.category_id" placeholder="選擇分類">
+            <el-option label="實體行動" :value="1" />
+            <el-option label="教育推廣" :value="2" />
+            <el-option label="線上參與" :value="3" />
           </el-select>
         </el-form-item>
 
@@ -243,34 +107,228 @@ const handleCancel = () => {
   </div>
 </template>
 
+<script setup>
+  import { ref, reactive, computed, onMounted } from 'vue'
+  import { useRoute, useRouter } from 'vue-router'
+  import { ElMessage } from 'element-plus'
+  import { useEventStore } from '@/stores/event_store'
+  import axios from 'axios'
+
+  const route = useRoute()
+  const router = useRouter()
+  const eventStore = useEventStore()
+
+  const isEditMode = computed(() => !!route.params.id)
+  const pageTitle = computed(() => (isEditMode.value ? '編輯活動' : '新增活動'))
+
+  const isReady = ref(false)
+  const isSubmitting = ref(false)
+  const loadError = ref(false)
+
+  const form = reactive({
+    id: null,
+    title: '',
+    eventDate: [],
+    regDeadline: '',
+    location: '',
+    address: '',
+    intro: '',
+    content: '',
+    note: '',
+    category_id: null,
+    quota: '',
+  })
+
+  const coverImageFile = ref(null)
+  const imagePreviewUrl = ref('')
+
+  const API_BASE_URL = 'http://localhost:8888/guard-sea_api'
+
+  const getFullLocation = (location, address) => {
+    if (location && address) {
+      return `${location} ${address}`
+    }
+    return location || address || ''
+  }
+
+  const getCategoryNameById = (id) => {
+    switch (id) {
+      case 1:
+        return '實體行動'
+      case 2:
+        return '教育推廣'
+      case 3:
+        return '線上參與'
+      default:
+        return ''
+    }
+  }
+
+  const initForm = async () => {
+    if (isEditMode.value) {
+      const id = Number(route.params.id)
+      const item = eventStore.eventData.find((i) => Number(i.id) === id)
+
+      if (item) {
+        form.id = item.id
+        form.title = item.title || ''
+        form.eventDate = [item.start_date, item.end_date]
+        form.regDeadline = item.registration_close_date
+          ? item.registration_close_date.split(' ')[0]
+          : ''
+
+        if (item.location) {
+          const parts = item.location.split(' ')
+          form.location = parts.length > 1 ? parts[0] : ''
+          form.address = parts.length > 1 ? parts.slice(1).join(' ') : parts[0]
+        } else {
+          form.location = ''
+          form.address = ''
+        }
+
+        form.intro = item.preface || ''
+        form.content = item.description || ''
+        form.note = item.notes || ''
+
+        // 關鍵修正：將 category_name 轉換回 category_id
+        // 這裡直接從 item.category_id 讀取，因為你的 event_store.js 已經有這個欄位了
+        form.category_id = parseInt(item.category, 10) || null
+
+        form.quota = item.quota || ''
+
+        if (item.image_url) {
+          imagePreviewUrl.value = `${API_BASE_URL}${item.image_url}`
+        }
+      } else {
+        loadError.value = true
+      }
+    }
+  }
+
+  onMounted(async () => {
+    try {
+      // 只需要載入活動資料，不需要分類資料了
+      await eventStore.fetchEventData()
+      initForm()
+    } catch (err) {
+      console.error('頁面載入失敗:', err)
+      loadError.value = true
+      ElMessage.error('載入資料失敗，請檢查網路或稍後再試。')
+    } finally {
+      isReady.value = true
+    }
+  })
+
+  const handleImageChange = (file) => {
+    coverImageFile.value = file.raw
+    imagePreviewUrl.value = URL.createObjectURL(file.raw)
+  }
+
+  const handleSubmit = async () => {
+    if (isSubmitting.value) return
+    isSubmitting.value = true
+
+    try {
+      if (!form.title) {
+        ElMessage.error('請填寫活動名稱')
+        isSubmitting.value = false
+        return
+      }
+      if (!form.eventDate || form.eventDate.length < 2) {
+        ElMessage.error('請填寫活動日期')
+        isSubmitting.value = false
+        return
+      }
+      if (!form.regDeadline) {
+        ElMessage.error('請填寫報名截止日期')
+        isSubmitting.value = false
+        return
+      }
+      // 確保 category_id 不是 null 或空字串
+      if (!form.category_id) {
+        ElMessage.error('請選擇活動分類')
+        isSubmitting.value = false
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('title', form.title)
+      formData.append('preface', form.intro || '')
+      formData.append('description', form.content || '')
+      formData.append('start_date', form.eventDate[0])
+      formData.append('end_date', form.eventDate[1])
+      formData.append('location', getFullLocation(form.location, form.address))
+      formData.append('quota', form.quota ? parseInt(form.quota) : 0)
+      formData.append('registration_close_date', form.regDeadline + ' 23:59:59')
+      formData.append('status', '報名中')
+      formData.append('notes', form.note || '')
+      formData.append('category_id', form.category_id) // 這裡使用原始值，FormData會處理
+
+      if (coverImageFile.value) {
+        formData.append('image_file', coverImageFile.value)
+      }
+
+      const apiPath = isEditMode.value ? 'update_event.php' : 'add_event.php'
+      const fullUrl = `${API_BASE_URL}/events/${apiPath}`
+
+      if (isEditMode.value) {
+        formData.append('id', form.id)
+      }
+
+      const response = await axios.post(fullUrl, formData)
+
+      if (response.data.status === 'success') {
+        ElMessage.success(isEditMode.value ? '活動編輯成功！' : '活動新增成功！')
+
+        if (response.data.image_url) {
+          imagePreviewUrl.value = `${API_BASE_URL}/${response.data.image_url}`
+        }
+
+        router.push({ name: 'eventlist' })
+      } else {
+        const errorMessage = response.data.message || '操作失敗，請稍後再試。'
+        ElMessage.error(`提交失敗：${errorMessage}`)
+      }
+    } catch (err) {
+      console.error('提交資料時發生錯誤:', err.response?.data || err.message)
+      ElMessage.error('提交失敗，請檢查網路連線或稍後再試。')
+    } finally {
+      isSubmitting.value = false
+    }
+  }
+
+  const handleCancel = () => {
+    router.back()
+  }
+</script>
 
 <style lang="scss" scoped>
-.content-block-wrapper {
-  padding: 2rem;
-}
-.content_title {
-  margin-bottom: 20px;
-}
-.coverimage-preview {
-  margin-top: 1rem;
-}
-.coverimage-img {
-  max-width: 200px;
-  margin: 0 1rem;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-}
-
-.form-row {
-  display: flex;
-  gap: 20px;
-
-  .half {
-    flex: 1;
+  .content-block-wrapper {
+    padding: 2rem;
   }
-}
+  .content_title {
+    margin-bottom: 20px;
+  }
+  .coverimage-preview {
+    margin-top: 1rem;
+  }
+  .coverimage-img {
+    max-width: 200px;
+    margin: 0 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  }
 
-::v-deep(.el-textarea__inner) {
-  resize: none;
-}
+  .form-row {
+    display: flex;
+    gap: 20px;
+
+    .half {
+      flex: 1;
+    }
+  }
+
+  ::v-deep(.el-textarea__inner) {
+    resize: none;
+  }
 </style>

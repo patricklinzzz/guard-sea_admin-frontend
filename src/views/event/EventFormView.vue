@@ -37,6 +37,10 @@
         />
       </el-form-item>
 
+      <el-form-item label="主講人">
+        <el-input v-model="form.presenter" placeholder="請輸入主講人" />
+      </el-form-item>
+
       <div class="form-row">
         <el-form-item label="活動地區" class="half">
           <el-select v-model="form.location" placeholder="選擇地區">
@@ -137,6 +141,7 @@
     note: '',
     category_id: null,
     quota: '',
+    presenter: '',
   })
 
   const coverImageFile = ref(null)
@@ -189,6 +194,7 @@
         form.intro = item.preface || ''
         form.content = item.description || ''
         form.note = item.notes || ''
+        form.presenter = item.presenter || ''
 
         // 關鍵修正：將 category_name 轉換回 category_id
         // 這裡直接從 item.category_id 讀取，因為你的 event_store.js 已經有這個欄位了
@@ -262,7 +268,8 @@
       formData.append('registration_close_date', form.regDeadline + ' 23:59:59')
       formData.append('status', '報名中')
       formData.append('notes', form.note || '')
-      formData.append('category_id', form.category_id) // 這裡使用原始值，FormData會處理
+      formData.append('category_id', form.category_id)
+      formData.append('presenter', form.presenter || '')
 
       if (coverImageFile.value) {
         formData.append('image_file', coverImageFile.value)
@@ -276,7 +283,7 @@
       }
 
       const response = await axios.post(fullUrl, formData)
-
+      console.log(response.data)
       if (response.data.status === 'success') {
         ElMessage.success(isEditMode.value ? '活動編輯成功！' : '活動新增成功！')
 

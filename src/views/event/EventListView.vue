@@ -142,6 +142,7 @@ const handleStatusChange = async (eventId, newStatus) => {
               {{ formatDateRange(scope.row.eventDate) }}
             </template>
           </el-table-column>
+          <el-table-column prop="presenter" label="主講人" min-width="120" align="center" /> <!-- 新增主講人欄位 -->
           <el-table-column prop="quota" label="名額" min-width="80" align="center" />
           <el-table-column label="名單查詢" min-width="120" align="center">
             <template #default="scope">

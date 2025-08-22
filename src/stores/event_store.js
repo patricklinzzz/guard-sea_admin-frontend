@@ -33,6 +33,7 @@ export const useEventStore = defineStore('event', () => {
           image_url: item.image_url,
           quota: Number(item.quota),
           status: item.status,
+          presenter: item.presenter,
           deadline: item.registration_close_date,
           eventDate: [item.start_date, item.end_date],
         }))

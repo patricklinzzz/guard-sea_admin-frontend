@@ -1,87 +1,123 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { Orders } from '@/data/product/orders'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE
+const ORDER_API_URL = `${API_BASE_URL}/orders`
 
 export const useOrderStore = defineStore('orders', () => {
   const orders = ref([])
-
   const currentOrder = ref(null)
-
   const isLoading = ref(false)
   const isDetailLoading = ref(false)
-
   const error = ref(null)
 
   const getOrderById = computed(() => {
-    return (orderId) => orders.value.find((order) => order.id === orderId)
+    return (orderId) => orders.value.find((order) => Number(order.order_id) === Number(orderId))
   })
 
   async function fetchOrders() {
     isLoading.value = true
     error.value = null
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      orders.value = Orders
+      const response = await axios.get(`${ORDER_API_URL}/get_orders.php`, {
+        withCredentials: true,
+      })
+      if (response.status !== 200 || !response.data) {
+        throw new Error('無法從伺服器獲取訂單資料')
+      }
+      orders.value = response.data.orders
     } catch (err) {
-      error.value = '讀取訂單列表失敗'
-      console.error(err)
+      error.value = err.response?.data?.error || err.message || '讀取訂單列表失敗'
+      console.error('讀取訂單列表失敗:', err)
     } finally {
       isLoading.value = false
     }
   }
 
-  async function fetchOrderById(orderId) {
+  async function fetchOrderDetails(orderId) {
     isDetailLoading.value = true
     error.value = null
     currentOrder.value = null
     try {
-      await new Promise((resolve) => setTimeout(resolve, 400))
-
-      const foundOrder = Orders.find((order) => order.id === orderId)
-
-      if (foundOrder) {
-        currentOrder.value = foundOrder
-      } else {
-        throw new Error('Order not found')
+      const response = await axios.get(`${ORDER_API_URL}/get_order_details.php`, {
+        params: { order_id: orderId },
+        withCredentials: true,
+      })
+      if (response.status !== 200 || !response.data?.order) {
+        throw new Error('無法從伺服器獲取訂單詳細資訊')
       }
+      currentOrder.value = response.data.order
     } catch (err) {
-      error.value = `找不到 ID 為 ${orderId} 的訂單`
-      console.error(err)
+      error.value = err.response?.data?.error || err.message || '讀取訂單詳細資訊失敗'
+      console.error('讀取訂單詳細資訊失敗:', err)
     } finally {
       isDetailLoading.value = false
     }
   }
 
   async function updateOrderStatus(orderId, newStatus) {
-    // await api.put(`/orders/${orderId}`, { status: newStatus })
-
-    const orderInList = orders.value.find((o) => o.id === orderId)
-    if (orderInList) {
-      orderInList.status = newStatus
-      orderInList.statusHistory.push({
-        status: newStatus,
-        timestamp: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      })
-    }
-
-    if (currentOrder.value && currentOrder.value.id === orderId) {
-      currentOrder.value.status = newStatus
+    try {
+      const response = await axios.post(
+        `${ORDER_API_URL}/patch_order.php`,
+        {
+          order_id: orderId,
+          status: newStatus,
+          _method: 'PATCH',
+        },
+        { withCredentials: true }
+      )
+      if (response.status === 200) {
+        ElMessage.success('訂單狀態更新成功')
+        const orderInList = orders.value.find((o) => Number(o.order_id) === Number(orderId))
+        if (orderInList) {
+          orderInList.status = newStatus
+        }
+        if (currentOrder.value && Number(currentOrder.value.order_id) === Number(orderId)) {
+          currentOrder.value.status = newStatus
+        }
+      } else {
+        throw new Error(response.data.error || '訂單狀態更新失敗')
+      }
+    } catch (err) {
+      ElMessage.error(err.message)
+      console.error('更新訂單狀態失敗:', err)
     }
   }
+
   async function updateOrderNotes(orderId, newNotes) {
     try {
-      const orderToUpdate = orders.value.find((o) => o.id === orderId)
-      if (orderToUpdate) {
-        orderToUpdate.notes = newNotes
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        return true 
+      const response = await axios.post(
+        `${ORDER_API_URL}/patch_order.php`,
+        {
+          order_id: orderId,
+          notes: newNotes,
+          _method: 'PATCH',
+        },
+        { withCredentials: true }
+      )
+      if (response.status === 200) {
+        ElMessage.success('訂單備註更新成功')
+        const orderInList = orders.value.find((o) => Number(o.order_id) === Number(orderId))
+        if (orderInList) {
+          orderInList.notes = newNotes
+        }
+        if (currentOrder.value && Number(currentOrder.value.order_id) === Number(orderId)) {
+          currentOrder.value.notes = newNotes
+        }
+        return true
+      } else {
+        throw new Error(response.data.error || '訂單備註更新失敗')
       }
-      return false 
-    } catch (error) {
-      console.error('更新備註失敗:', error)
-      return false 
+    } catch (err) {
+      ElMessage.error(err.message)
+      console.error('更新訂單備註失敗:', err)
+      return false
     }
   }
+
   return {
     orders,
     currentOrder,
@@ -90,7 +126,7 @@ export const useOrderStore = defineStore('orders', () => {
     error,
     getOrderById,
     fetchOrders,
-    fetchOrderById,
+    fetchOrderDetails,
     updateOrderStatus,
     updateOrderNotes,
   }

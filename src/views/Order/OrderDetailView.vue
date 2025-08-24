@@ -6,11 +6,21 @@
   const route = useRoute()
   const orderStore = useOrderStore()
 
+  const paymentMethodMap = {
+    credit_card: '信用卡',
+    linepay: 'Line Pay',
+    cash_on_delivery: '貨到付款',
+  }
+
+  const getPaymentMethodName = (method) => {
+    return paymentMethodMap[method] || method
+  }
+
   watch(
     () => route.params.id,
     (newId) => {
       if (newId) {
-        orderStore.fetchOrderById(newId)
+        orderStore.fetchOrderDetails(Number(newId))
       }
     },
     { immediate: true }
@@ -18,7 +28,7 @@
 
   onMounted(() => {
     if (route.params.id) {
-      orderStore.fetchOrderById(route.params.id)
+      orderStore.fetchOrderDetails(Number(route.params.id))
     }
   })
 </script>
@@ -39,42 +49,41 @@
       <section class="info-section">
         <h3>基本資訊</h3>
         <ul>
-          <li>訂單編號:{{ orderStore.currentOrder.id }}</li>
-          <li>訂單日期:{{ orderStore.currentOrder.orderDate }}</li>
+          <li>訂單編號:{{ orderStore.currentOrder.order_id }}</li>
+          <li>訂單日期:{{ orderStore.currentOrder.order_date }}</li>
           <li>訂單狀態:{{ orderStore.currentOrder.status }}</li>
-          <li>付款方式:{{ orderStore.currentOrder.paymentMethod }}</li>
-          <li>付款狀態:{{ orderStore.currentOrder.paymentStatus }}</li>
-          <li>總金額:NT$ {{ orderStore.currentOrder.total }}</li>
+          <li>付款方式:{{ getPaymentMethodName(orderStore.currentOrder.payment_method) }}</li>
+          <li>付款狀態:{{ orderStore.currentOrder.payment_status }}</li>
+          <li>總金額:NT$ {{ orderStore.currentOrder.final_amount }}</li>
         </ul>
       </section>
 
       <section class="info-section">
         <h3>購買人資訊</h3>
         <ul>
-          <li>購買人姓名:{{ orderStore.currentOrder.customerName }}</li>
-          <li>聯絡電話:{{ orderStore.currentOrder.customerPhone }}</li>
-          <li>電子郵件:{{ orderStore.currentOrder.customerEmail }}</li>
-          <li>收件地址:{{ orderStore.currentOrder.shippingAddress }}</li>
+          <li>購買人姓名:{{ orderStore.currentOrder.receiver_name }}</li>
+          <li>聯絡電話:{{ orderStore.currentOrder.receiver_phone }}</li>
+          <li>電子郵件:{{ orderStore.currentOrder.member_email }}</li>
+          <li>收件地址:{{ orderStore.currentOrder.receiver_address }}</li>
         </ul>
       </section>
 
       <section class="info-section">
         <h3>商品明細</h3>
         <ul>
-          <li v-for="item in orderStore.currentOrder.items" :key="item.productId">
-            {{ item.productName }}:{{ item.price }} x {{ item.quantity }} =
-            {{ item.price * item.quantity }}
+          <li v-for="item in orderStore.currentOrder.order_items" :key="item.product_id">
+            {{ item.product_name }}:{{ item.price_at_purchase }} x {{ item.quantity }} =
+            {{ item.price_at_purchase * item.quantity }}
           </li>
-          <li>總計:NT$ {{ orderStore.currentOrder.total }}</li>
+          <li>總計:NT$ {{ orderStore.currentOrder.final_amount }}</li>
         </ul>
       </section>
 
       <section class="info-section">
         <h3>訂單狀態</h3>
         <ul>
-          <li v-for="history in orderStore.currentOrder.statusHistory" :key="history.timestamp">
-            {{ history.status }} - {{ history.timestamp }}
-          </li>
+
+          <li>{{ orderStore.currentOrder.status }}</li>
         </ul>
       </section>
 

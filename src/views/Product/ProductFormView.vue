@@ -30,7 +30,7 @@
     price: 0,
     main_image_url: '',
     size: [],
-    colors: [], 
+    colors: [],
     category_id: null,
     status: '上架',
     styles: [],
@@ -148,7 +148,7 @@
           status: Number(newProductData.status) === 1 ? '上架' : '下架',
           size: sizeArray,
           styles: stylesFromBackend,
-          colors: colorsArray, 
+          colors: colorsArray,
         })
       } else {
         Object.assign(form, getInitialForm())
@@ -167,8 +167,6 @@
     productStore.fetchProducts()
     categoryStore.fetchCategories()
   })
-
-  // 新增一個顏色輸入框
   const addColor = () => {
     form.colors.push('#FFFFFF')
   }

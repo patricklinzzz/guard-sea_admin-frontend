@@ -12,14 +12,18 @@
   const currentPage = ref(1)
   const selectedStatus = ref('all')
   const searchText = ref('')
-  const searchKey = ref('id')
+  const searchKey = ref('order_id')
 
   const editingOrderId = ref(null)
-
   const tempNotesMap = ref({})
 
+  const statusMap = {
+    processing: '處理中',
+    shipped: '已出貨',
+  }
+
   onMounted(() => {
-    orderStore.fetchOrders()
+    orderStore.fetchOrders(true)
   })
 
   const statusOptions = computed(() => {
@@ -27,11 +31,17 @@
     orderStore.orders.forEach((item) => {
       counts[item.status] = (counts[item.status] || 0) + 1
     })
-    return Object.entries(counts).map(([key, count]) => ({
-      label: key,
+    const options = Object.entries(counts).map(([key, count]) => ({
+      label: statusMap[key] || key,
       value: key,
       count,
     }))
+    options.unshift({
+      label: '全部狀態',
+      value: 'all',
+      count: orderStore.orders.length,
+    })
+    return options
   })
 
   const filteredData = computed(() => {
@@ -49,21 +59,14 @@
     return data
   })
 
-  const handleStatusChange = async (order, newStatus) => {
-    if (editingOrderId.value === order.id) return
-    await orderStore.updateOrderStatus(order.id, newStatus)
-    ElMessage.success(`訂單 ${order.id} 狀態已更新為 ${newStatus}`)
-  }
-
   const goToDetail = (row) => {
-    router.push({ name: 'orderdetail', params: { id: row.id } })
+    router.push({ name: 'orderdetail', params: { id: row.order_id } })
   }
 
   const handleStartEdit = (row) => {
     if (editingOrderId.value) return
-
-    editingOrderId.value = row.id
-    tempNotesMap.value[row.id] = row.notes
+    editingOrderId.value = Number(row.order_id)
+    tempNotesMap.value[Number(row.order_id)] = row.notes
   }
 
   const handleCancelEdit = () => {
@@ -75,14 +78,14 @@
   }
 
   const handleSaveEdit = async (row) => {
-    const newNote = tempNotesMap.value[row.id]
+    const newNote = tempNotesMap.value[Number(row.order_id)]
+    console.log('準備更新訂單 ID:', Number(row.order_id), '新備註:', newNote)
     if (newNote === row.notes) {
       ElMessage.info('備註內容沒有變動。')
       handleCancelEdit()
       return
     }
-
-    const success = await orderStore.updateOrderNotes(row.id, newNote)
+    const success = await orderStore.updateOrderNotes(Number(row.order_id), newNote)
     if (success) {
       ElMessage.success('備註更新成功！')
     } else {
@@ -111,37 +114,29 @@
     >
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="id" label="訂單編號" width="200" />
-          <el-table-column prop="orderDate" label="訂單日期" width="180" align="center" />
+          <el-table-column prop="order_id" label="訂單編號" width="200" />
+          <el-table-column prop="order_date" label="訂單日期" width="180" align="center" />
           <el-table-column label="訂單狀態" width="130" align="center">
             <template #default="scope">
-              <el-select
-                :model-value="scope.row.status"
-                @change="(newStatus) => handleStatusChange(scope.row, newStatus)"
-                size="small"
-                :disabled="editingOrderId === scope.row.id"
-              >
-                <el-option label="處理中" value="處理中" />
-                <el-option label="已出貨" value="已出貨" />
-              </el-select>
+              <el-tag :type="scope.row.status === '已出貨' ? 'success' : 'info'" size="small">
+                {{ scope.row.status }}
+              </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="customerName" label="訂購人" width="100" align="center" />
+          <el-table-column prop="member_name" label="訂購人" width="100" align="center" />
           <el-table-column label="合計" width="120" align="center">
-            <template #default="scope">${{ scope.row.total.toLocaleString() }}</template>
+            <template #default="scope">${{ scope.row.final_amount?.toLocaleString() }}</template>
           </el-table-column>
-
           <el-table-column label="訂單詳情" width="120" align="center">
             <template #default="scope">
               <el-button link type="primary" @click="goToDetail(scope.row)">>></el-button>
             </template>
           </el-table-column>
-
           <el-table-column label="備註" min-width="150">
             <template #default="scope">
               <el-input
-                v-if="editingOrderId === scope.row.id"
-                v-model="tempNotesMap[scope.row.id]"
+                v-if="editingOrderId === Number(scope.row.order_id)"
+                v-model="tempNotesMap[Number(scope.row.order_id)]"
                 size="small"
                 @keyup.enter="handleSaveEdit(scope.row)"
                 :placeholder="scope.row.notes || '點此新增備註'"
@@ -149,10 +144,9 @@
               <span v-else>{{ scope.row.notes || '無' }}</span>
             </template>
           </el-table-column>
-
           <el-table-column label="編輯" width="150" align="center">
             <template #default="scope">
-              <div v-if="editingOrderId === scope.row.id" class="edit-actions">
+              <div v-if="editingOrderId === Number(scope.row.order_id)" class="edit-actions">
                 <el-button @click="handleCancelEdit">取消</el-button>
                 <el-button type="warning" @click="handleSaveEdit(scope.row)">儲存</el-button>
               </div>
@@ -179,7 +173,7 @@
 
     box-sizing: border-box;
   }
-  .el-button.is-link  {
+  .el-button.is-link {
     font-size: 18px;
   }
 

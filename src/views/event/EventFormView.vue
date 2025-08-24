@@ -1,116 +1,3 @@
-<template>
-  <div class="content-block-wrapper">
-    <header class="content-header">
-      <h2 class="content_title">{{ pageTitle }}</h2>
-    </header>
-
-    <div v-if="!isReady" class="loading-state">載入中...</div>
-    <div v-else-if="loadError" class="error-state">找不到該筆資料，請返回列表頁。</div>
-
-    <el-form
-      v-else
-      :model="form"
-      label-width="100px"
-      style="max-width: 800px"
-      @submit.prevent="handleSubmit"
-    >
-      <el-form-item label="活動名稱">
-        <el-input v-model="form.title" />
-      </el-form-item>
-
-      <el-form-item label="活動日期">
-        <el-date-picker
-          v-model="form.eventDate"
-          type="datetimerange"
-          start-placeholder="開始日期時間"
-          end-placeholder="結束日期時間"
-          value-format="YYYY-MM-DD HH:mm:ss"
-        />
-      </el-form-item>
-
-      <el-form-item label="報名截止">
-        <el-date-picker
-          v-model="form.regDeadline"
-          type="date"
-          placeholder="選擇截止日期"
-          value-format="YYYY-MM-DD"
-        />
-      </el-form-item>
-
-      <el-form-item label="主講人">
-        <el-input v-model="form.presenter" placeholder="請輸入主講人" />
-      </el-form-item>
-
-      <div class="form-row">
-        <el-form-item label="活動地區" class="half">
-          <el-select v-model="form.location" placeholder="選擇地區">
-            <el-option label="台北" value="台北" />
-            <el-option label="新北" value="新北" />
-            <el-option label="高雄" value="高雄" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="地址" class="half">
-          <el-input v-model="form.address" />
-        </el-form-item>
-      </div>
-
-      <el-form-item label="活動大圖">
-        <el-upload
-          class="upload-demo"
-          :show-file-list="false"
-          :auto-upload="false"
-          :on-change="handleImageChange"
-          accept="image/*"
-        >
-          <el-button type="primary">上傳檔案</el-button>
-        </el-upload>
-        <div v-if="imagePreviewUrl" class="coverimage-preview">
-          <img :src="imagePreviewUrl" alt="封面預覽" class="coverimage-img" />
-        </div>
-      </el-form-item>
-
-      <el-form-item label="活動介紹">
-        <el-input type="textarea" v-model="form.intro" :rows="3" />
-      </el-form-item>
-
-      <el-form-item label="活動內容">
-        <el-input type="textarea" v-model="form.content" :rows="5" />
-      </el-form-item>
-
-      <el-form-item label="備註">
-        <el-input
-          type="textarea"
-          v-model="form.note"
-          :rows="3"
-          style="min-height: 100px; resize: none"
-        />
-      </el-form-item>
-
-      <div class="form-row">
-        <el-form-item label="活動分類" class="half">
-          <el-select v-model="form.category_id" placeholder="選擇分類">
-            <el-option label="實體行動" :value="1" />
-            <el-option label="教育推廣" :value="2" />
-            <el-option label="線上參與" :value="3" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="名額" class="half">
-          <el-input v-model="form.quota" />
-        </el-form-item>
-      </div>
-
-      <el-form-item>
-        <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
-          {{ isEditMode ? '儲存' : '新增' }}
-        </el-button>
-        <el-button @click="handleCancel">取消</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
-</template>
-
 <script setup>
   import { ref, reactive, computed, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
@@ -196,8 +83,6 @@
         form.note = item.notes || ''
         form.presenter = item.presenter || ''
 
-        // 關鍵修正：將 category_name 轉換回 category_id
-        // 這裡直接從 item.category_id 讀取，因為你的 event_store.js 已經有這個欄位了
         form.category_id = parseInt(item.category, 10) || null
 
         form.quota = item.quota || ''
@@ -213,7 +98,6 @@
 
   onMounted(async () => {
     try {
-      // 只需要載入活動資料，不需要分類資料了
       await eventStore.fetchEventData()
       initForm()
     } catch (err) {
@@ -250,7 +134,6 @@
         isSubmitting.value = false
         return
       }
-      // 確保 category_id 不是 null 或空字串
       if (!form.category_id) {
         ElMessage.error('請選擇活動分類')
         isSubmitting.value = false
@@ -308,6 +191,136 @@
     router.back()
   }
 </script>
+
+<template>
+  <div class="content-block-wrapper">
+    <header class="content-header">
+      <h2 class="content_title">{{ pageTitle }}</h2>
+    </header>
+
+    <div v-if="!isReady" class="loading-state">載入中...</div>
+    <div v-else-if="loadError" class="error-state">找不到該筆資料，請返回列表頁。</div>
+
+    <el-form
+      v-else
+      :model="form"
+      label-width="100px"
+      style="max-width: 800px"
+      @submit.prevent="handleSubmit"
+    >
+      <el-form-item label="活動名稱">
+        <el-input v-model="form.title" />
+      </el-form-item>
+
+      <el-form-item label="活動日期">
+        <el-date-picker
+          v-model="form.eventDate"
+          type="datetimerange"
+          start-placeholder="開始日期時間"
+          end-placeholder="結束日期時間"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        />
+      </el-form-item>
+
+      <el-form-item label="報名截止">
+        <el-date-picker
+          v-model="form.regDeadline"
+          type="date"
+          placeholder="選擇截止日期"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+
+      <el-form-item label="主講人">
+        <el-input v-model="form.presenter" placeholder="請輸入主講人" />
+      </el-form-item>
+
+      <div class="form-row">
+        <el-form-item label="活動地區" class="half">
+          <el-select v-model="form.location" placeholder="選擇地區">
+            <el-option label="台北" value="台北" />
+            <el-option label="新北" value="新北" />
+            <el-option label="基隆" value="基隆" />
+            <el-option label="桃園" value="桃園" />
+            <el-option label="宜蘭" value="宜蘭" />
+            <el-option label="花蓮" value="花蓮" />
+            <el-option label="台東" value="台東" />
+            <el-option label="新竹" value="新竹" />
+            <el-option label="苗栗" value="苗栗" />
+            <el-option label="台中" value="台中" />
+            <el-option label="南投" value="南投" />
+            <el-option label="彰化" value="彰化" />
+            <el-option label="嘉義" value="嘉義" />
+            <el-option label="台南" value="台南" />
+            <el-option label="高雄" value="高雄" />
+            <el-option label="小琉球" value="小琉球" />
+            <el-option label="金門" value="金門" />
+            <el-option label="馬祖" value="馬祖" />
+            <el-option label="綠島" value="綠島" />
+            <el-option label="蘭嶼" value="蘭嶼" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="地址" class="half">
+          <el-input v-model="form.address" />
+        </el-form-item>
+      </div>
+
+      <el-form-item label="活動大圖">
+        <el-upload
+          class="upload-demo"
+          :show-file-list="false"
+          :auto-upload="false"
+          :on-change="handleImageChange"
+          accept="image/*"
+        >
+          <el-button type="primary">上傳檔案</el-button>
+        </el-upload>
+        <div v-if="imagePreviewUrl" class="coverimage-preview">
+          <img :src="imagePreviewUrl" alt="封面預覽" class="coverimage-img" />
+        </div>
+      </el-form-item>
+
+      <el-form-item label="活動介紹">
+        <el-input type="textarea" v-model="form.intro" :rows="3" />
+      </el-form-item>
+
+      <el-form-item label="活動內容">
+        <el-input type="textarea" v-model="form.content" :rows="5" />
+      </el-form-item>
+
+      <el-form-item label="備註">
+        <el-input
+          type="textarea"
+          v-model="form.note"
+          :rows="3"
+          style="min-height: 100px; resize: none"
+        />
+      </el-form-item>
+
+      <div class="form-row">
+        <el-form-item label="活動分類" class="half">
+          <el-select v-model="form.category_id" placeholder="選擇分類">
+            <el-option label="實體行動" :value="1" />
+            <el-option label="教育推廣" :value="2" />
+            <el-option label="線上參與" :value="3" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="名額" class="half">
+          <el-input v-model="form.quota" />
+        </el-form-item>
+      </div>
+
+      <el-form-item>
+        <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
+          {{ isEditMode ? '儲存' : '新增' }}
+        </el-button>
+        <el-button @click="handleCancel">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
 
 <style lang="scss" scoped>
   .content-block-wrapper {

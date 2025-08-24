@@ -9,8 +9,6 @@ import { useEventStore } from '@/stores/event_store'
 
 const eventStore = useEventStore()
 const router = useRouter()
-
-// 這裡填入你的後端 API 路徑
 const backendUpdateUrl = 'http://localhost:8888/guard-sea_api/events/update_event_status.php';
 
 // 頁面狀態
@@ -107,9 +105,6 @@ const handleStatusChange = async (eventId, newStatus) => {
         await eventStore.fetchEventData();
     }
 };
-
-// 移除 watch 函式，因為我們現在使用 @change 事件
-
 </script>
 
 <template>

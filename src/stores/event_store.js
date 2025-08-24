@@ -5,7 +5,7 @@ import { ref } from 'vue'
 
 export const useEventStore = defineStore('event', () => {
   const eventData = ref([])
-  const categoryData = ref([]) // 新增一個 ref 來儲存分類資料
+  const categoryData = ref([]) 
   const fetchError = ref(null)
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE

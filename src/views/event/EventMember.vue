@@ -19,7 +19,6 @@ onMounted(() => {
     }
 })
 
-// 根據 searchTerm 過濾報名名單，改為以 phone 欄位進行搜尋
 const filteredRegistrations = computed(() => {
     if (!searchTerm.value) return registrationStore.registrationList
     return registrationStore.registrationList.filter((a) =>
@@ -27,7 +26,6 @@ const filteredRegistrations = computed(() => {
     )
 })
 
-// 執行搜尋時，重設頁面為第一頁
 const performSearch = () => {
     currentPage.value = 1
 }

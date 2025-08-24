@@ -147,7 +147,7 @@
   const coverImageFile = ref(null)
   const imagePreviewUrl = ref('')
 
-  const API_BASE_URL = 'http://localhost:8888/guard-sea_api'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE
 
   const getFullLocation = (location, address) => {
     if (location && address) {

@@ -1,5 +1,22 @@
 <script setup>
   import { RouterLink } from 'vue-router'
+  import { onMounted, ref } from 'vue'
+  import axios from 'axios'
+
+  const dashboard_data = ref([])
+  const baseUrl = import.meta.env.VITE_API_BASE
+  const fetchDashboard = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/dashboard/data.php`)
+      dashboard_data.value = response.data
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  onMounted(() => {
+    fetchDashboard()
+  })
 </script>
 
 <template>
@@ -7,26 +24,26 @@
   <el-row :gutter="20">
     <el-col :span="6">
       <el-card style="max-width: 300px">
-        <p>今日新增會員</p>
-        <h1 id="number">123</h1>
+        <p>會員總數量</p>
+        <h1 class="number">{{ dashboard_data.member_count }}</h1>
       </el-card>
     </el-col>
     <el-col :span="6">
       <el-card style="max-width: 300px">
         <p>今日訂單</p>
-        <h1 id="number">123</h1>
+        <h1 class="number">{{ dashboard_data.orders_today }}</h1>
       </el-card>
     </el-col>
     <el-col :span="6">
       <el-card style="max-width: 300px">
         <p>今日報名人數</p>
-        <h1 id="number">123</h1>
+        <h1 class="number">{{ dashboard_data.registrations_today }}</h1>
       </el-card>
     </el-col>
     <el-col :span="6">
       <el-card style="max-width: 300px">
         <p>進行中活動</p>
-        <h1 id="number">123</h1>
+        <h1 class="number">{{ dashboard_data.activities }}</h1>
       </el-card>
     </el-col>
   </el-row>
@@ -69,7 +86,7 @@
     font-size: 24px;
     margin-bottom: 30px;
   }
-  #number {
+  .number {
     font-size: 40px;
     font-weight: normal;
   }

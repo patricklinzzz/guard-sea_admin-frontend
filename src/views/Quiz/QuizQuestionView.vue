@@ -118,14 +118,14 @@
     >
       <template #default="scope">
         <el-table :data="scope.data" prop="quiz_id" stripe style="width: 100%">
-          <el-table-column prop="question_description" label="題目" width="600" align="center">
+          <el-table-column prop="question_description" label="題目" min-width="600" align="center">
             <template #default="{ row }">
               <div style="display: flex; height: 100%">
                 {{ row.question_description }}
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="answer" label="答案" width="300" align="center">
+          <el-table-column prop="answer" label="答案" min-width="300" align="center">
             <template #default="{ row }">
               <div
                 style="display: flex; justify-content: center; align-items: center; height: 100%"
@@ -135,7 +135,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="編輯" width="80" align="center">
+          <el-table-column label="編輯" min-width="80" align="center">
             <template #default="{ row }">
               <el-button link type="primary" @click="handleEdit(row)">
                 <el-icon><Edit /></el-icon>
@@ -143,7 +143,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="刪除" width="80" align="center">
+          <el-table-column label="刪除" min-width="80" align="center">
             <template #default="{ row }">
               <el-button link type="danger" @click="handleDelete(row)">
                 <el-icon><Delete /></el-icon>

@@ -140,7 +140,7 @@
         <!-- 這裡的 min-width 是觸發子元件滾動的條件 -->
 
         <el-table :data="scope.data" stripe style="width: 100%">
-          <el-table-column prop="title" label="測驗標題" width="150" align="center">
+          <el-table-column prop="title" label="測驗標題" min-width="150" align="center">
             <template #default="{ row }">
               <div
                 style="display: flex; justify-content: center; align-items: center; height: 100%"
@@ -149,7 +149,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="quiz_description" label="測驗描述" width="400" align="center">
+          <el-table-column prop="quiz_description" label="測驗描述" min-width="400" align="center">
             <template #default="{ row }">
               <div
                 v-if="!editingState.has(row.quiz_id)"
@@ -165,7 +165,7 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="pass_grade" width="120" label="及格標準" align="center">
+          <el-table-column prop="pass_grade" min-width="120" label="及格標準" align="center">
             <template #default="{ row }">
               <span v-if="!editingState.has(row.quiz_id)">{{ row.pass_grade }}%</span>
               <el-input-number
@@ -181,7 +181,7 @@
           </el-table-column>
 
           <!-- 🐋 🐢 🌊 🐳 🦞 🐠 -->
-          <el-table-column prop="question_num" label="題目數量" width="120" align="center">
+          <el-table-column prop="question_num" label="題目數量" min-width="120" align="center">
             <template #default="{ row }">
               <span v-if="!editingState.has(row.quiz_id)">{{ row.question_num }}</span>
               <el-input-number
@@ -196,7 +196,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="編輯" width="175" align="center">
+          <el-table-column label="編輯" min-width="175" align="center">
             <template #default="{ row }">
               <div v-if="editingState.has(row.quiz_id)" width="200">
                 <el-button type="default" @click="handleCancel(row)">取消</el-button>

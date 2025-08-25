@@ -10,10 +10,7 @@
   const productStore = useProductStore()
   const categoryStore = useProductCategoryStore()
 
-  // 1. (新增) 讀取 Vite 環境變數
   const API_BASE_URL = import.meta.env.VITE_API_BASE
-
-  // 2. (新增) 在此元件內定義 getImageUrl 函式
   const getImageUrl = (path) => {
     if (!path || path.startsWith('http')) {
       return path

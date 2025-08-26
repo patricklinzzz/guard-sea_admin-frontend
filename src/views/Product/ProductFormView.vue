@@ -12,6 +12,14 @@
   const productStore = useProductStore()
   const categoryStore = useProductCategoryStore()
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE
+  const getImageUrl = (path) => {
+    if (!path || path.startsWith('http')) {
+      return path
+    }
+    return `${API_BASE_URL}${path}`
+  }
+
   const isEditMode = computed(() => !!route.params.id)
   const pageTitle = computed(() => (isEditMode.value ? '編輯商品' : '新增商品'))
 
@@ -124,8 +132,6 @@
         const colorsArray = newProductData.color_code
           ? String(newProductData.color_code).split(',')
           : []
-        const backendBaseUrl = 'http://localhost:8888/guard-sea_api'
-
         const imageUrls = [
           newProductData.main_image_url,
           newProductData.sub_image_1,
@@ -135,7 +141,7 @@
 
         const stylesFromBackend = [...new Set(imageUrls)].map((url, index) => ({
           uid: `backend-${index}-${Date.now()}`,
-          imageUrl: `${backendBaseUrl}${url}`,
+          imageUrl: getImageUrl(url),
           fileName: url.substring(url.lastIndexOf('/') + 1),
           isNew: false,
           backendPath: url,

@@ -10,6 +10,13 @@
   const productStore = useProductStore()
   const categoryStore = useProductCategoryStore()
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE
+  const getImageUrl = (path) => {
+    if (!path || path.startsWith('http')) {
+      return path
+    }
+    return `${API_BASE_URL}${path}`
+  }
   const currentPage = ref(1)
   const selectedCategory = ref('all')
   const categoryOptions = ref([])
@@ -94,7 +101,7 @@
               <div class="image-container">
                 <el-image
                   v-if="scope.row.main_image_url"
-                  :src="`http://localhost:8888/guard-sea_api${scope.row.main_image_url}`"
+                  :src="getImageUrl(scope.row.main_image_url)"
                   fit="cover"
                   style="width: 100%; height: 100%"
                 />

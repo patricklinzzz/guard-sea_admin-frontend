@@ -208,11 +208,11 @@
       style="max-width: 800px"
       @submit.prevent="handleSubmit"
     >
-      <el-form-item label="活動名稱">
+      <el-form-item label="活動名稱" required>
         <el-input v-model="form.title" />
       </el-form-item>
 
-      <el-form-item label="活動日期">
+      <el-form-item label="活動日期" required>
         <el-date-picker
           v-model="form.eventDate"
           type="datetimerange"
@@ -222,7 +222,7 @@
         />
       </el-form-item>
 
-      <el-form-item label="報名截止">
+      <el-form-item label="報名截止" required>
         <el-date-picker
           v-model="form.regDeadline"
           type="date"
@@ -231,13 +231,10 @@
         />
       </el-form-item>
 
-      <el-form-item label="主講人">
-        <el-input v-model="form.presenter" placeholder="請輸入主講人" />
-      </el-form-item>
-
       <div class="form-row">
-        <el-form-item label="活動地區" class="half">
+        <el-form-item label="活動地區" class="half" required>
           <el-select v-model="form.location" placeholder="選擇地區">
+            <el-option label="線上直播" value="線上直播" />
             <el-option label="台北" value="台北" />
             <el-option label="新北" value="新北" />
             <el-option label="基隆" value="基隆" />
@@ -266,6 +263,24 @@
         </el-form-item>
       </div>
 
+      <div class="form-row">
+        <el-form-item label="活動分類" class="half" required>
+          <el-select v-model="form.category_id" placeholder="選擇分類">
+            <el-option label="實體行動" :value="1" />
+            <el-option label="教育推廣" :value="2" />
+            <el-option label="線上參與" :value="3" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="名額" class="half">
+          <el-input v-model="form.quota" />
+        </el-form-item>
+      </div>
+      
+      <el-form-item label="主講人">
+        <el-input v-model="form.presenter" placeholder="請輸入主講人" />
+      </el-form-item>
+
       <el-form-item label="活動大圖">
         <el-upload
           class="upload-demo"
@@ -286,7 +301,11 @@
       </el-form-item>
 
       <el-form-item label="活動內容">
-        <el-input type="textarea" v-model="form.content" :rows="5" />
+        <el-input
+          type="textarea"
+          v-model="form.content"
+          :rows="5"
+        />
       </el-form-item>
 
       <el-form-item label="備註">
@@ -297,20 +316,6 @@
           style="min-height: 100px; resize: none"
         />
       </el-form-item>
-
-      <div class="form-row">
-        <el-form-item label="活動分類" class="half">
-          <el-select v-model="form.category_id" placeholder="選擇分類">
-            <el-option label="實體行動" :value="1" />
-            <el-option label="教育推廣" :value="2" />
-            <el-option label="線上參與" :value="3" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="名額" class="half">
-          <el-input v-model="form.quota" />
-        </el-form-item>
-      </div>
 
       <el-form-item>
         <el-button type="primary" @click="handleSubmit" :loading="isSubmitting">
@@ -331,6 +336,8 @@
   }
   .coverimage-preview {
     margin-top: 1rem;
+    display: flex;
+    justify-content: center;
   }
   .coverimage-img {
     max-width: 200px;

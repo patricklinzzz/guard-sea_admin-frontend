@@ -130,7 +130,11 @@ const handleStatusChange = async (eventId, newStatus) => {
       <template #default="scope">
         <el-table :data="scope.data" stripe style="width: 100%">
           <el-table-column prop="title" label="活動名稱" min-width="180" />
-          <el-table-column prop="category" label="活動分類" min-width="120" align="center" />
+          <el-table-column prop="category" label="活動分類" min-width="120" align="center">
+            <template #default="scope">
+              {{ eventStore.categoryData.find(c => c.id === scope.row.category)?.name || '未分類' }}
+            </template>
+          </el-table-column>
           <el-table-column prop="deadline" label="報名截止" min-width="140" align="center" />
           <el-table-column label="活動日期" min-width="180" align="center">
             <template #default="scope">

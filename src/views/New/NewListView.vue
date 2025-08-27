@@ -166,7 +166,7 @@
     // 這個 row 物件就是 Element Plus Table 傳過來的整筆資料，
     // 因為 v-model 的關係，row.status 此時已經是使用者選擇的新狀態了。
 
-    console.log(`準備更新 ID: ${row.news_id} 的狀態為: ${row.status}`)
+    //console.log(`準備更新 ID: ${row.news_id} 的狀態為: ${row.status}`)
 
     try {
       // 步驟 1: 建立一個 FormData 物件，準備發送到後端
@@ -184,7 +184,7 @@
       await newStore.updateNews(formData)
     } catch (error) {
       // 如果 Pinia action 拋出錯誤 (例如網路中斷、API 報錯)
-      console.error('在列表頁更新狀態時失敗:', error)
+      //console.error('在列表頁更新狀態時失敗:', error)
 
       // 為了保持前端畫面和資料庫的資料一致性，
       // 更新失敗時，最簡單的方式是強制重新從伺服器獲取一次最新資料，
@@ -221,7 +221,7 @@
           //    這個 catch 會捕捉到它。
           //    store 內部已經用 ElMessage.error 提示了，
           //    這裡可以選擇性地在控制台留下更詳細的日誌，方便除錯。
-          console.error('在元件層捕捉到刪除失敗:', error)
+          //console.error('在元件層捕捉到刪除失敗:', error)
         }
       })
       .catch(() => {

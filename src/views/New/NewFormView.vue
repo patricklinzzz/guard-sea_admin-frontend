@@ -155,7 +155,7 @@
       }
     } catch (err) {
       loadError.value = true
-      console.error('頁面載入失敗:', err)
+      //console.error('頁面載入失敗:', err)
     } finally {
       isReady.value = true
     }
@@ -232,7 +232,7 @@
       // 如果 Store 中的 action 拋出了錯誤，會在這裡被捕捉到
       // ElMessage.error 也已經在 Store 中處理了
       // 這裡主要是為了確保 loading 狀態能被關閉
-      console.error('表單提交時發生錯誤:', error)
+      //console.error('表單提交時發生錯誤:', error)
     } finally {
       // 步驟 7：無論成功或失敗，最後都要關閉按鈕的 loading 狀態
       isSubmitting.value = false

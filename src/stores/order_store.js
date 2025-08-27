@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE
 const ORDER_API_URL = `${API_BASE_URL}/orders`
 
@@ -31,7 +30,7 @@ export const useOrderStore = defineStore('orders', () => {
       orders.value = response.data.orders
     } catch (err) {
       error.value = err.response?.data?.error || err.message || '讀取訂單列表失敗'
-      console.error('讀取訂單列表失敗:', err)
+      //console.error('讀取訂單列表失敗:', err)
     } finally {
       isLoading.value = false
     }
@@ -52,7 +51,7 @@ export const useOrderStore = defineStore('orders', () => {
       currentOrder.value = response.data.order
     } catch (err) {
       error.value = err.response?.data?.error || err.message || '讀取訂單詳細資訊失敗'
-      console.error('讀取訂單詳細資訊失敗:', err)
+      //console.error('讀取訂單詳細資訊失敗:', err)
     } finally {
       isDetailLoading.value = false
     }
@@ -83,7 +82,7 @@ export const useOrderStore = defineStore('orders', () => {
       }
     } catch (err) {
       ElMessage.error(err.message)
-      console.error('更新訂單狀態失敗:', err)
+      //console.error('更新訂單狀態失敗:', err)
     }
   }
 
@@ -113,7 +112,7 @@ export const useOrderStore = defineStore('orders', () => {
       }
     } catch (err) {
       ElMessage.error(err.message)
-      console.error('更新訂單備註失敗:', err)
+      //console.error('更新訂單備註失敗:', err)
       return false
     }
   }

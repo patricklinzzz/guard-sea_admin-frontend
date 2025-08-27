@@ -42,7 +42,7 @@ export const useProductStore = defineStore('productAdmin', () => {
       products.value = response.data.map(transformProductData)
     } catch (err) {
       error.value = err.response?.data?.error || err.message || '獲取商品資料失敗'
-      console.error('獲取商品資料失敗:', err.response?.data || err)
+      //console.error('獲取商品資料失敗:', err.response?.data || err)
     } finally {
       isLoading.value = false
     }
@@ -64,7 +64,7 @@ export const useProductStore = defineStore('productAdmin', () => {
       return response.data.url
     } catch (err) {
       const errorMessage = err.response?.data?.error || err.message || '圖片上傳時發生未知錯誤'
-      console.error('圖片上傳失敗:', err.response?.data || err)
+      //console.error('圖片上傳失敗:', err.response?.data || err)
       ElMessage.error(errorMessage)
       throw new Error(errorMessage)
     }
@@ -86,7 +86,7 @@ export const useProductStore = defineStore('productAdmin', () => {
       return response.data
     } catch (err) {
       formError.value = err.response?.data?.error || err.message || '新增商品失敗'
-      console.error('新增商品失敗:', err.response?.data || err)
+      //console.error('新增商品失敗:', err.response?.data || err)
       throw new Error(formError.value)
     } finally {
       isFormLoading.value = false
@@ -109,7 +109,7 @@ export const useProductStore = defineStore('productAdmin', () => {
       return response.data
     } catch (err) {
       formError.value = err.response?.data?.error || err.message || '更新商品失敗'
-      console.error('更新商品失敗:', err.response?.data || err)
+      //console.error('更新商品失敗:', err.response?.data || err)
       throw new Error(formError.value)
     } finally {
       isFormLoading.value = false
@@ -133,7 +133,7 @@ export const useProductStore = defineStore('productAdmin', () => {
     }
   }
   async function generateNextSku(category) {
-    console.log('Generating SKU for category:', category)
+    //console.log('Generating SKU for category:', category)
     try {
       await fetchProducts()
       const categoryPrefixes = {
@@ -159,7 +159,7 @@ export const useProductStore = defineStore('productAdmin', () => {
       const newSerial = String(maxSerial + 1).padStart(2, '0')
       return `${searchPrefix}${newSerial}`
     } catch (error) {
-      console.error('SKU 生成失敗:', error)
+      //console.error('SKU 生成失敗:', error)
       throw new Error('無法生成 SKU，請確認後端資料。')
     }
   }

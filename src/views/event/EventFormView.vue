@@ -101,7 +101,7 @@
       await eventStore.fetchEventData()
       initForm()
     } catch (err) {
-      console.error('頁面載入失敗:', err)
+      //console.error('頁面載入失敗:', err)
       loadError.value = true
       ElMessage.error('載入資料失敗，請檢查網路或稍後再試。')
     } finally {
@@ -166,7 +166,7 @@
       }
 
       const response = await axios.post(fullUrl, formData)
-      console.log(response.data)
+      //console.log(response.data)
       if (response.data.status === 'success') {
         ElMessage.success(isEditMode.value ? '活動編輯成功！' : '活動新增成功！')
 
@@ -180,7 +180,7 @@
         ElMessage.error(`提交失敗：${errorMessage}`)
       }
     } catch (err) {
-      console.error('提交資料時發生錯誤:', err.response?.data || err.message)
+      //console.error('提交資料時發生錯誤:', err.response?.data || err.message)
       ElMessage.error('提交失敗，請檢查網路連線或稍後再試。')
     } finally {
       isSubmitting.value = false
@@ -276,7 +276,7 @@
           <el-input v-model="form.quota" />
         </el-form-item>
       </div>
-      
+
       <el-form-item label="主講人">
         <el-input v-model="form.presenter" placeholder="請輸入主講人" />
       </el-form-item>
@@ -301,11 +301,7 @@
       </el-form-item>
 
       <el-form-item label="活動內容">
-        <el-input
-          type="textarea"
-          v-model="form.content"
-          :rows="5"
-        />
+        <el-input type="textarea" v-model="form.content" :rows="5" />
       </el-form-item>
 
       <el-form-item label="備註">

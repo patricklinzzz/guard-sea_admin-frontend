@@ -104,7 +104,7 @@ export const useNewStore = defineStore('new', () => {
   //     categories.value = mockCategories
   //   } catch (err) {
   //     fetchError.value = '資料載入失敗，請稍後再試'
-  //     console.error('Fetch 錯誤：', err)
+  //     //console.error('Fetch 錯誤：', err)
   //   }
   // }
 
@@ -137,7 +137,7 @@ export const useNewStore = defineStore('new', () => {
       categories.value = response.data.categories
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
-      console.error('Fetch 錯誤：', err)
+      //console.error('Fetch 錯誤：', err)
       throw new Error(fetchError.value)
     }
   }

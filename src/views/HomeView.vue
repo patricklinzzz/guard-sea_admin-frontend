@@ -10,7 +10,7 @@
       const response = await axios.get(`${baseUrl}/dashboard/data.php`)
       dashboard_data.value = response.data
     } catch (error) {
-      console.error(error)
+      //console.error(error)
     }
   }
 

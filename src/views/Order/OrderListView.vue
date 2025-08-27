@@ -79,7 +79,7 @@
 
   const handleSaveEdit = async (row) => {
     const newNote = tempNotesMap.value[Number(row.order_id)]
-    console.log('準備更新訂單 ID:', Number(row.order_id), '新備註:', newNote)
+    //console.log('準備更新訂單 ID:', Number(row.order_id), '新備註:', newNote)
     if (newNote === row.notes) {
       ElMessage.info('備註內容沒有變動。')
       handleCancelEdit()

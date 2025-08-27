@@ -12,7 +12,7 @@ export const useQuizStore = defineStore('quiz', () => {
 
   const fetchAllQuizzes = async () => {
     // Simulate an API call with a delay
-    console.log('Simulating API call to fetch quizzes...')
+    //console.log('Simulating API call to fetch quizzes...')
     try {
       const question_api = `${baseUrl}/questions/get_questions.php`
       const quiz_api = `${baseUrl}/quiz/get_quiz.php`
@@ -20,7 +20,7 @@ export const useQuizStore = defineStore('quiz', () => {
       const questions = await axios.get(question_api)
       quizzes.value = questions.data
 
-      console.log(quizzes.value)
+      //console.log(quizzes.value)
 
       const quiz = await axios.get(quiz_api)
       quiz_title.value = quiz.data
@@ -31,7 +31,7 @@ export const useQuizStore = defineStore('quiz', () => {
       isInitialized.value = true
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
-      console.error('Fetch 錯誤：', err)
+      //console.error('Fetch 錯誤：', err)
     }
   }
 
@@ -52,9 +52,9 @@ export const useQuizStore = defineStore('quiz', () => {
       try {
         const apiUrl = `${baseUrl}/questions/post_questions.php`
         const response = await axios.post(apiUrl, newQuestion)
-        console.log('Quiz created successfully:', response.data)
+        //console.log('Quiz created successfully:', response.data)
       } catch (err) {
-        console.error('Post Error:', err)
+        //console.error('Post Error:', err)
       }
 
       // quiz.push({ ...newQuestion, question_id: nextId })
@@ -65,8 +65,8 @@ export const useQuizStore = defineStore('quiz', () => {
     const quiz = quizzes.value
     const num_here = counts.value[+row.quiz_id]
     const num_from_quiz = +quiz_title.value[+row.quiz_id - 1].question_num
-    console.log(`num here: ${num_here}`)
-    console.log(`num from quiz: ${num_from_quiz}`)
+    //console.log(`num here: ${num_here}`)
+    //console.log(`num from quiz: ${num_from_quiz}`)
     if (num_here - 1 < num_from_quiz) {
       return 0
     }
@@ -76,13 +76,13 @@ export const useQuizStore = defineStore('quiz', () => {
       try {
         const apiUrl = `${baseUrl}/questions/delete_questions.php?question_id=${q_id}`
         const response = await axios.delete(apiUrl)
-        console.log('question deleted successfully:', response.data.result)
+        //console.log('question deleted successfully:', response.data.result)
 
         const question_index = quiz.findIndex((q) => q.question_id == q_id)
         if (question_index != -1) quiz.splice(question_index, 1)
         return 1
       } catch (err) {
-        console.error('delete Error:', err)
+        //console.error('delete Error:', err)
         return -1
       }
     }
@@ -93,9 +93,9 @@ export const useQuizStore = defineStore('quiz', () => {
     try {
       const apiUrl = `${baseUrl}/questions/patch_questions.php`
       const response = await axios.patch(apiUrl, newQuestion)
-      console.log('Quiz edit successfully:', response.data)
+      //console.log('Quiz edit successfully:', response.data)
     } catch (err) {
-      console.error('Post Error:', err)
+      //console.error('Post Error:', err)
     }
     // const question = quiz.find((q) => q.question_id == newQuestion.question_id)
     // if (question) {

@@ -88,7 +88,7 @@
         if (e === 'cancel') {
           return
         }
-        console.error('移除圖片失敗:', e)
+        //console.error('移除圖片失敗:', e)
         ElMessage.error('移除圖片失敗，請稍後再試。')
       }
     }
@@ -115,7 +115,7 @@
             form.sku = newSku
           }
         } catch (error) {
-          console.error('無法生成商品編號:', error)
+          //console.error('無法生成商品編號:', error)
           form.sku = '生成失敗，請稍後重試'
         } finally {
           isGeneratingSku.value = false
@@ -233,8 +233,8 @@
       ElMessage.success('儲存成功！')
       router.push({ name: 'productlist' })
     } catch (error) {
-      console.error('儲存失敗:', error)
-      ElMessage.error(error.message || '儲存失敗，請查看 Console。')
+      //console.error('儲存失敗:', error)
+      ElMessage.error(error.message || '儲存失敗，請查看 //console。')
     } finally {
       isSubmitting.value = false
     }

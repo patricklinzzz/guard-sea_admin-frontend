@@ -58,7 +58,7 @@
         }
       }
     } catch (err) {
-      console.error('❌ 資料載入錯誤:', err)
+      //console.error('❌ 資料載入錯誤:', err)
       loadError.value = true
     } finally {
       isReady.value = true

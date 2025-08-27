@@ -36,10 +36,10 @@
         pass_grade: false,
         num: false,
       }))
-      console.log(allTableData.value)
+      //console.log(allTableData.value)
     } catch (err) {
       fetchError.value = '資料載入失敗，請稍後再試'
-      console.error('Fetch 錯誤：', err)
+      //console.error('Fetch 錯誤：', err)
     }
   }
 
@@ -54,7 +54,7 @@
     })
   }
   const handleEdit = (row) => {
-    console.log(hasError.value)
+    //console.log(hasError.value)
     editingState.value.set(row.quiz_id, true)
     row.originalData = JSON.parse(JSON.stringify(row))
   }
@@ -67,7 +67,7 @@
   }
 
   const handleSubmit = async (row) => {
-    console.log(row)
+    //console.log(row)
     const row_i = row.quiz_id - 1
     let error = false
     if (row.quiz_description.trim() === '') {
@@ -109,9 +109,9 @@
     try {
       const apiUrl = `${baseUrl}/quiz/patch_quiz.php`
       const response = await axios.patch(apiUrl, row)
-      console.log('Quiz edit successfully:', response.data)
+      //console.log('Quiz edit successfully:', response.data)
     } catch (err) {
-      console.error('Post Error:', err)
+      //console.error('Post Error:', err)
     }
 
     setTimeout(() => {

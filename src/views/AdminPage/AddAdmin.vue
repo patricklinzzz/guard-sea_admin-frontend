@@ -1,6 +1,13 @@
 <template>
   <h2 style="font-size: 24px">新增管理員</h2>
-  <el-form :model="form" label-width="auto" style="max-width: 600px" labelPosition="top" ref="formRef" autocomplete="off">
+  <el-form
+    :model="form"
+    label-width="auto"
+    style="max-width: 600px"
+    labelPosition="top"
+    ref="formRef"
+    autocomplete="off"
+  >
     <el-form-item label="管理員帳號">
       <el-input v-model="form.username" />
     </el-form-item>
@@ -33,7 +40,7 @@
         { validator: validatePassword, trigger: 'blur' },
       ]"
     >
-      <el-input v-model="form.password" type="password" show-password autocomplete="new-password"/>
+      <el-input v-model="form.password" type="password" show-password autocomplete="new-password" />
     </el-form-item>
     <el-form-item>
       <el-button @click="handleCancel">取消</el-button>
@@ -90,7 +97,7 @@
       ElMessage.success('新增管理員成功')
       router.push({ name: 'adminlist' })
     } catch (error) {
-      console.error('新增管理員失敗:', error)
+      //console.error('新增管理員失敗:', error)
       ElMessage.error(error.message || '新增管理員失敗，請檢查網路或後端。')
     }
   }

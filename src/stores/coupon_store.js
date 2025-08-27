@@ -72,7 +72,7 @@ export const useCouponStore = defineStore('coupon', () => {
       const { data } = await api.get(COUPONS_LIST_URL, { params: { q, limit, offset } })
       coupons.value = (data.items || []).map(normalize)
     } catch (e) {
-      console.error(e)
+      //console.error(e)
       error.value = e?.response?.data?.error || e.message || '讀取優惠券列表失敗'
       coupons.value = []
     } finally {
@@ -86,7 +86,7 @@ export const useCouponStore = defineStore('coupon', () => {
     error.value = null
     try {
       const payload = toPatchPayload(updatedFields)
-      console.log('Payload to be sent:', payload) // <-- 添加這行
+      //console.log('Payload to be sent:', payload) // <-- 添加這行
       let resp
       try {
         // 先嘗試原生 PATCH（axios）
@@ -114,7 +114,7 @@ export const useCouponStore = defineStore('coupon', () => {
 
       return true
     } catch (e) {
-      console.error(e)
+      //console.error(e)
       error.value = e?.response?.data?.error || e.message || '更新失敗'
       return false
     } finally {
@@ -141,7 +141,7 @@ export const useCouponStore = defineStore('coupon', () => {
 //       coupons.value = JSON.parse(JSON.stringify(fakeCoupons))
 //     } catch (err) {
 //       error.value = '讀取優惠券列表失敗'
-//       console.error(err)
+//       //console.error(err)
 //     } finally {
 //       isLoading.value = false
 //     }

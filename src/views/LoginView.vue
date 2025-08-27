@@ -37,7 +37,7 @@
       loading.value = true
       await authStore.login(loginForm)
     } catch (validationError) {
-      console.log('Form validation failed:', validationError)
+      //console.log('Form validation failed:', validationError)
     } finally {
       loading.value = false
     }

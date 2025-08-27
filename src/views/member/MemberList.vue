@@ -92,7 +92,7 @@
       const response = await axios.get(`${baseUrl}/members/get_members.php`)
       allMembers.value = response.data
     } catch (error) {
-      console.log(error)
+      //console.log(error)
     }
   }
 
@@ -124,20 +124,20 @@
     }
   }
 
-  const handleViewCoupons =async (member) => {
+  const handleViewCoupons = async (member) => {
     selectedMember.value = member
     try {
-      const response = await axios.post(`${baseUrl}/members/get_member_coupons.php`,member)
-      if(response.data.success){
+      const response = await axios.post(`${baseUrl}/members/get_member_coupons.php`, member)
+      if (response.data.success) {
         selectedMemberCoupons.value = response.data.data
-      }else {
-      selectedMemberCoupons.value = []
+      } else {
+        selectedMemberCoupons.value = []
       }
-    }catch(error){
-      console.error(error);
+    } catch (error) {
+      //console.error(error);
       selectedMemberCoupons.value = []
     }
-    console.log(selectedMemberCoupons.value);
+    //console.log(selectedMemberCoupons.value);
     dialogVisible.value = true
   }
 </script>

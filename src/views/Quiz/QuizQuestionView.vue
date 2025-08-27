@@ -52,7 +52,7 @@
         type: 'warning',
       })
       const res = await quizStore.deleteQuestionToQuiz(row)
-      console.log(res)
+      //console.log(res)
       switch (res) {
         case 0:
           ElMessage({
@@ -79,7 +79,7 @@
       //   fakeDelete(row)
       // }, 500) // 延遲刪除
     } catch (err) {
-      console.log('取消刪除', err)
+      //console.log('取消刪除', err)
     }
   }
 

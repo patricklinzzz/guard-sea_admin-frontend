@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
       ElMessage.success('登入成功')
       await router.push('/')
     } catch (error) {
-      console.error('登入失敗:', error.response?.data?.message || error.message)
+      //console.error('登入失敗:', error.response?.data?.message || error.message)
       ElMessage.error(error.response?.data?.message || '登入失敗，請重試。')
     }
   }
@@ -47,7 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null
       }
     } catch (error) {
-      console.error('檢查登入狀態失敗:', error)
+      //console.error('檢查登入狀態失敗:', error)
       isAuthenticated.value = false
       user.value = null
     }
@@ -56,18 +56,18 @@ export const useAuthStore = defineStore('auth', () => {
   // 登出使用者並清除狀態。
   async function logout() {
     try {
-      const response =await api.get('/logout.php')
+      const response = await api.get('/logout.php')
 
-      if(response.data.success){
-        isAuthenticated.value =false
-        user.value=null
+      if (response.data.success) {
+        isAuthenticated.value = false
+        user.value = null
         ElMessage.info('您已登出')
         await router.push('/login')
-      }else{
+      } else {
         throw new Error('登出失敗')
       }
-    }catch(error){
-      console.error(error.message);
+    } catch (error) {
+      //console.error(error.message);
       ElMessage.error('登出失敗')
     }
   }

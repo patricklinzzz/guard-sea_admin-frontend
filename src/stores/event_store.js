@@ -5,7 +5,7 @@ import { ref } from 'vue'
 
 export const useEventStore = defineStore('event', () => {
   const eventData = ref([])
-  const categoryData = ref([]) 
+  const categoryData = ref([])
   const fetchError = ref(null)
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE
@@ -47,7 +47,7 @@ export const useEventStore = defineStore('event', () => {
         fetchError.value = res.data.message || '載入活動失敗'
       }
     } catch (err) {
-      console.error('活動資料載入失敗', err)
+      //console.error('活動資料載入失敗', err)
       fetchError.value = '無法連線到伺服器'
     }
   }
@@ -56,15 +56,15 @@ export const useEventStore = defineStore('event', () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/events/add_event.php`, event)
       if (res.data.status === 'success') {
-        console.log('活動新增成功', res.data)
+        //console.log('活動新增成功', res.data)
         await fetchEventData()
         return { success: true, message: res.data.message }
       } else {
-        console.error('新增活動失敗', res.data.message)
+        //console.error('新增活動失敗', res.data.message)
         return { success: false, message: res.data.message }
       }
     } catch (err) {
-      console.error('新增活動時發生錯誤', err)
+      //console.error('新增活動時發生錯誤', err)
       return { success: false, message: '無法連線到伺服器或發生網路錯誤' }
     }
   }
@@ -220,6 +220,6 @@ export const useEventStore = defineStore('event', () => {
 //         eventData.value = eventApi
 //         } catch (err) {
 //         fetchError.value = '活動資料載入失敗，請稍後再試'
-//         console.error('Fetch 錯誤：', err)
+//         //console.error('Fetch 錯誤：', err)
 //         }
 //     }

@@ -88,7 +88,14 @@
       error = true
     } else hasError.value[row_i].pass_grade = false
 
-    if (row.question_num < 1 || row.question_num > 20) {
+    if (!Number.isInteger(row.question_num)) {
+      hasError.value[row_i].num = true
+      ElMessage({
+        message: '題目必須為整數!',
+        type: 'error',
+      })
+      error = true
+    } else if (row.question_num < 1 || row.question_num > 20) {
       hasError.value[row_i].num = true
       ElMessage({
         message: '題目至少1題，至多20題!',
@@ -103,7 +110,6 @@
       })
       error = true
     } else hasError.value[row_i].num = false
-
     if (error) return
 
     try {
